@@ -44,8 +44,9 @@
 #define r_front_wall_judge 600//110
 #define x_size 15
 #define y_size 15
-#define GOAL_X 7
-#define GOAL_Y 7
+#define GOAL_X 3
+#define GOAL_Y 0
+#define SAMPLE_NUMBER 1000
 
 volatile typedef struct { /* 構造体の型枠を定義して，同時にそれを型名 velocty_t として定義する */
 	float right;
