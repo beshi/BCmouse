@@ -7,7 +7,7 @@
 #include "iodefine.h"
 #include "BC_subroutine.h"
 #include "BC_define.h"
-
+#include "math.h"
 
 void battery_ADconvert() {
 	SYSTEM.MSTPCRA.BIT.MSTPA16 = 0; //12bitAD1ストップ解除
@@ -642,7 +642,6 @@ char is_saved_wall_exist(char hikisuu_x, char hikisuu_y,
 	volatile unsigned short Wall_Judge = 0;
 	switch (hikisuu_direction_count) {
 	case 0:	//North
-		Wall_Judge = row_temp[hikisuu_y] & (0x8000 >> hikisuu_x);
 //		if(hikisuu_y==y_size){
 //			break;
 //		}
@@ -654,7 +653,6 @@ char is_saved_wall_exist(char hikisuu_x, char hikisuu_y,
 		}
 		break;
 	case 1:	//East
-		Wall_Judge = column_temp[hikisuu_x] & 0x0001 << hikisuu_y;
 //		if(hikisuu_x==x_size){
 //			break;
 //		}

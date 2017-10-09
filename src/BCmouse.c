@@ -130,7 +130,7 @@ volatile unsigned_short_fix_t a = { 0 };
 
 volatile const turn_velocities_t turn[7] = {//[0]:重心速度500  [1]:重心速度650  [2]:速度750  [3]:速度800 [4]:速度900  [5]:速度  [6]:速度
 		{
-		/*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
+		/*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*///重心速度500
 		{ 90.0, 22.5, 67.5, 5500.0, -1.0, 13.0, 12.0, 500.0, 0, 1 },	//右小回り
 				{ 90.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0 },	//右大回り
 				{ 180.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0 },	//右Uターン
@@ -148,7 +148,7 @@ volatile const turn_velocities_t turn[7] = {//[0]:重心速度500  [1]:重心速
 				{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 0 },//斜め→左135°ターン
 				{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 0 } //斜め→左V90°ターン
 		}, {
-			  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
+             		  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*///重心速度650
 				{  90.0,  30.0,  60.0, 7500.0,  -1.0,   4.0,   8.0,  650.0,    0,     1 }, //右小回り
 				{  90.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //右大回り
 				{ 180.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //右Uターン
@@ -1314,8 +1314,13 @@ void daikei_for_pass_kai(float hikisuu_dist, float vmax, float hikisuu_accel,
 
 void daikei_for_pass_kai2(float hikisuu_dist, float vmax, float hikisuu_accel,
 		float v_0, float vterm, char hikisuu_wall, char hikisuu_kabekire) {	//20170928(台形加速の距離の考え方を変える)
+<<<<<<< HEAD
 	volatile char k_enable_enable = 0;	//クソ頭悪いフラグなので北信越語に直そうな…
 	daikei_mode = 2;	//探索用モード
+=======
+//	volatile char k_enable_enable = 0;	//クソ頭悪いフラグなので北信越語に直そうな…
+	daikei_mode = 2;	//探索用モード(壁切れの距離補正で使用する)
+>>>>>>> d09babbea1f2f1919dcd5cdea21aade8b455f238
 
 	kabekire_enable_2 = 0;
 	k_enable_enable = hikisuu_kabekire;
@@ -1389,9 +1394,15 @@ void daikei_for_pass_kai2(float hikisuu_dist, float vmax, float hikisuu_accel,
 				}
 
 				if (kabekire_right == 1) {	//壁切れによる補正
+<<<<<<< HEAD
 					adjust_distance = kabekire_dist_right(vterm);
 					balance_distance =  hikisuu_dist - adjust_distance;//壁切れ補正(1.0は決め打ち)//変更！
 					ideal_balance_distance =  hikisuu_dist - adjust_distance;//壁切れ補正//変更！
+=======
+				        adjust_distance = kabekire_dist_right(vterm);//終端速度により距離補正値を変更
+					balance_distance = hikisuu_dist - adjust_distance;//壁切れ補正(1.0は決め打ち)
+					ideal_balance_distance = hikisuu_dist - adjust_distance;//壁切れ補正
+>>>>>>> d09babbea1f2f1919dcd5cdea21aade8b455f238
 
 //					LED2 = 1;	//debug
 //					LED3 = 1;	//debug
@@ -3149,8 +3160,12 @@ void exe_kamawari_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_m
 		vel_high = 800.0;
 		accel_normal = 5000.0;
 		aa = 1;	//速度650
+<<<<<<< HEAD
 		bb = 3;	//速度800
 		cc = 1;	//斜め速度650
+=======
+		bb = 1;	//速度650
+>>>>>>> d09babbea1f2f1919dcd5cdea21aade8b455f238
 
 	} else if (para_mode == 3) {
 		vel_low = 650.0;
@@ -3170,10 +3185,17 @@ void exe_kamawari_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_m
 
 	}
 	//以下、最初の動作のみ別枠で行う。
+<<<<<<< HEAD
 	if (pass[read_p_i] >= 1 && pass[read_p_i] <= 30) {
 		daikei_for_pass_kai(90.0 * pass[read_p_i], vel_high, hikisuu_accel, 0.0,
 				vel_high, 1, 0);
 	} else if (pass[read_p_i] == 74) {	//開幕右小回り→1区間加速
+=======
+	if (motion[read_p_i] >= 1 && motion[read_p_i] <= 30) {
+		daikei_for_pass_kai(90.0 * motion[read_p_i], vel_high, hikisuu_accel, 0.0,
+				vel_high, 1, 0);
+	} else if (motion[read_p_i] == 74) {	//開幕右小回り→1区間加速
+>>>>>>> d09babbea1f2f1919dcd5cdea21aade8b455f238
 		daikei_for_pass_kai(90.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);
 		slalom_2(90.0, 22.5, 67.5, 1000.0, 5500, -1.0, 500.0, 13.0, 0.0);//右小回り(後距離0)  ????
 		daikei_for_pass_kai(90.0, vel_high, accel_normal, vel_low, vel_high, 1,
@@ -3721,10 +3743,8 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_mode) {
 
 	} else if (motion[read_p_i] == 253) {	//斜め無し・開幕ターンあり  学生大会で直した
 		daikei_for_pass_kai(90.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);//緩やかに加速する
-
 	} else if (motion[read_p_i] == 255) {	//斜め無し・開幕ターン無し  学生大会で直した
 		daikei_for_pass_kai(90.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
-
 	} else {
 	}
 	//以下、最初以外の動作
@@ -5052,6 +5072,23 @@ void interrupt_CMT0() {
 				if (kushi_judge == 1) {	//両方の壁切れのうち、右が櫛なら左の壁切れを読む
 					kabekire_right = 0;
 					kabekire_left = 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				} else if (kushi_judge == 2) {	//両方の壁切れのうち、左が櫛なら右の壁切れを読む
 					kabekire_right = 1;
 					kabekire_left = 0;
