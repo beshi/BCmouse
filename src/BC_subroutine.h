@@ -36,6 +36,9 @@ char is_the_Wall_watched(char hikisuu_x, char hikisuu_y,
 		char hikisuu_direction_count);
 char is_saved_wall_watched(char hikisuu_x, char hikisuu_y,
 		char hikisuu_direction_count);
+void slalom_for_tuning(float hikisuu_angle, float angle1, float angle2, float omega_max,
+		float hikisuu_angacc, float unclock_wise,
+		float hikisuu_balance_velocity, float dist1, float dist2);
 void temp_test_mazedata();
 
 #endif /* BC_SUBROUTINE_H_ */

@@ -35,17 +35,17 @@
 //#define Kp_wall 0.00005
 #define DIFF_THRESHOLD 15.0//30.0
 #define DIFF_WALL_THRE 100.0
-#define sen_right_refer 1490 //2000
-#define sen_left_refer 1520 //1450
+#define sen_right_refer 1380 //2000
+#define sen_left_refer 1720 //1520
 #define r_threshold 1000//1500	//1400
 #define l_threshold 900//1000	//900
 #define r_wall_judge 800
 #define l_wall_judge 800
-#define r_front_wall_judge 600//110
+#define r_front_wall_judge 1000//110
 #define x_size 15
 #define y_size 15
-#define GOAL_X 3
-#define GOAL_Y 0
+#define GOAL_X 7
+#define GOAL_Y 7
 #define SAMPLE_NUMBER 1000
 
 volatile typedef struct { /* 構造体の型枠を定義して，同時にそれを型名 velocty_t として定義する */
@@ -114,17 +114,19 @@ extern volatile unsigned char sample_flag, refer_flag, gyro_enable,
 		reference_fin, wall_control, ei_flag_center, ei_flag_rot,
 		direction_count, x, y, sensor_enable, q_dist_flag, kabekire_right,
 		kabekire_left, kabeiri_right, kabeiri_left, kabekire_enable,
-		kabekire_enable_2, kushi_judge, pass[200], motion[100], last_p_i;
+		kabekire_enable_2, kushi_judge, pass[200], motion[100], last_p_i,fail_flag;
 extern volatile int sen_bat, sen_l_f_ON, sen_l_s_ON, sen_r_f_ON, sen_r_s_ON,
 		sen_l_f_OFF, sen_l_s_OFF, sen_r_f_OFF, sen_r_s_OFF, gptcount_l,
 		gptcount_r, sample_count, refer_count, buff_sen_right[10],
 		buff_sen_left[10], sen_count, jkl;
 extern volatile unsigned short map[16][16], row_temp[15], column_temp[15],
-		row_fix[15], column_fix[15], row_watched_fix[15], column_watched_fix[15],
-		row_watched_temp[15], column_watched_temp[15],level[16][15], vertical[15][16];
+		row_fix[15], column_fix[15], row_watched_fix[15],
+		column_watched_fix[15], row_watched_temp[15], column_watched_temp[15],
+		level[16][15], vertical[15][16];
+
 extern volatile long cmt_count;
 extern volatile float Battery, dutty_r, dutty_l, omega, angle, reference_omega,
-		diff_omega[3], ideal_omega, ideal_angle, ei_r, ei_l, ideal_angacc,
+		diff_omega[3], ideal_omega, ideal_omega2, ideal_angle, ei_r, ei_l, ideal_angacc,
 		balance_velocity, balance_distance, ideal_balance_velocity,
 		ideal_balance_accel, ideal_balance_distance, diff_balance_velocity[3],
 		Error, Kp_wall_r, Kp_wall_l, EI_keisuu, EP_keisuu,

@@ -525,6 +525,7 @@ void watched_wall_front(int hikisuu_x, int hikisuu_y,
 		break;
 	}
 }
+
 void watched_wall_right(int hikisuu_x, int hikisuu_y,
 		int hikisuu_direction_count) {
 	switch (hikisuu_direction_count) {
@@ -589,6 +590,9 @@ char is_Exist_Wall(char hikisuu_x, char hikisuu_y, char hikisuu_direction_count)
 	volatile unsigned short Wall_Judge = 0;
 	switch (hikisuu_direction_count) {
 	case 0:	//North
+		if(hikisuu_y==y_size){
+			break;
+		}
 		Wall_Judge = row_temp[hikisuu_y] & (0x8000 >> hikisuu_x);
 		if (Wall_Judge == (0x8000 >> hikisuu_x)) {
 			Wall_Judge = 1;
@@ -597,6 +601,9 @@ char is_Exist_Wall(char hikisuu_x, char hikisuu_y, char hikisuu_direction_count)
 		}
 		break;
 	case 1:	//East
+		if(hikisuu_x==x_size){
+			break;
+		}
 		Wall_Judge = column_temp[hikisuu_x] & 0x0001 << hikisuu_y;
 		if (Wall_Judge == 0x0001 << hikisuu_y) {
 			Wall_Judge = 1;
@@ -605,6 +612,9 @@ char is_Exist_Wall(char hikisuu_x, char hikisuu_y, char hikisuu_direction_count)
 		}
 		break;
 	case 2:	//South
+		if(hikisuu_y==0){
+			break;
+		}
 		Wall_Judge = row_temp[hikisuu_y - 1] & 0x8000 >> hikisuu_x;
 		if (Wall_Judge == 0x8000 >> hikisuu_x) {
 			Wall_Judge = 1;
@@ -613,6 +623,9 @@ char is_Exist_Wall(char hikisuu_x, char hikisuu_y, char hikisuu_direction_count)
 		}
 		break;
 	case 3:	//West
+		if(hikisuu_x==0){
+			break;
+		}
 		Wall_Judge = column_temp[hikisuu_x - 1] & 0x0001 << hikisuu_y;
 		if (Wall_Judge == 0x0001 << hikisuu_y) {
 			Wall_Judge = 1;
@@ -630,6 +643,10 @@ char is_saved_wall_exist(char hikisuu_x, char hikisuu_y,
 	switch (hikisuu_direction_count) {
 	case 0:	//North
 		Wall_Judge = row_temp[hikisuu_y] & (0x8000 >> hikisuu_x);
+//		if(hikisuu_y==y_size){
+//			break;
+//		}
+		Wall_Judge = row_fix[hikisuu_y] & (0x8000 >> hikisuu_x);
 		if (Wall_Judge == (0x8000 >> hikisuu_x)) {
 			Wall_Judge = 1;
 		} else {
@@ -638,6 +655,10 @@ char is_saved_wall_exist(char hikisuu_x, char hikisuu_y,
 		break;
 	case 1:	//East
 		Wall_Judge = column_temp[hikisuu_x] & 0x0001 << hikisuu_y;
+//		if(hikisuu_x==x_size){
+//			break;
+//		}
+		Wall_Judge = column_fix[hikisuu_x] & 0x0001 << hikisuu_y;
 		if (Wall_Judge == 0x0001 << hikisuu_y) {
 			Wall_Judge = 1;
 		} else {
@@ -645,7 +666,10 @@ char is_saved_wall_exist(char hikisuu_x, char hikisuu_y,
 		}
 		break;
 	case 2:	//South
-		Wall_Judge = row_temp[hikisuu_y - 1] & 0x8000 >> hikisuu_x;
+//		if(hikisuu_y==0){
+//			break;
+//		}
+		Wall_Judge = row_fix[hikisuu_y - 1] & 0x8000 >> hikisuu_x;
 		if (Wall_Judge == 0x8000 >> hikisuu_x) {
 			Wall_Judge = 1;
 		} else {
@@ -653,7 +677,10 @@ char is_saved_wall_exist(char hikisuu_x, char hikisuu_y,
 		}
 		break;
 	case 3:	//West
-		Wall_Judge = column_temp[hikisuu_x - 1] & 0x0001 << hikisuu_y;
+//		if(hikisuu_x==0){
+//			break;
+//		}
+		Wall_Judge = column_fix[hikisuu_x - 1] & 0x0001 << hikisuu_y;
 		if (Wall_Judge == 0x0001 << hikisuu_y) {
 			Wall_Judge = 1;
 		} else {
@@ -818,25 +845,25 @@ void add_saved_wall_front(int hikisuu_x, int hikisuu_y, int hikisuu_direction_co
 		if (hikisuu_y == 15) {
 			break;
 		}
-		row_temp[hikisuu_y] |= 32768 >> hikisuu_x;
+		row_fix[hikisuu_y] |= 32768 >> hikisuu_x;
 		break;
 	case 1:		//East
 		if (hikisuu_x == 15) {
 			break;
 		}
-		column_temp[hikisuu_x] |= 1 << hikisuu_y;
+		column_fix[hikisuu_x] |= 1 << hikisuu_y;
 		break;
 	case 2:		//South
 		if (hikisuu_y == 0) {
 			break;
 		}
-		row_temp[hikisuu_y - 1] |= 32768 >> hikisuu_x;
+		row_fix[hikisuu_y - 1] |= 32768 >> hikisuu_x;
 		break;
 	case 3:		//West
 		if (hikisuu_x == 0) {
 			break;
 		}
-		column_temp[hikisuu_x - 1] |= 1 << hikisuu_y;
+		column_fix[hikisuu_x - 1] |= 1 << hikisuu_y;
 		break;
 	}
 }
@@ -846,25 +873,25 @@ void add_saved_wall_right(int hikisuu_x, int hikisuu_y, int hikisuu_direction_co
 		if (hikisuu_x == 15) {
 			break;
 		}
-		column_temp[hikisuu_x] |= 1 << hikisuu_y;
+		column_fix[hikisuu_x] |= 1 << hikisuu_y;
 		break;
 	case 1:		//East
 		if (hikisuu_y == 0) {
 			break;
 		}
-		row_temp[hikisuu_y - 1] |= 32768 >> hikisuu_x;
+		row_fix[hikisuu_y - 1] |= 32768 >> hikisuu_x;
 		break;
 	case 2:		//South
 		if (hikisuu_x == 0) {
 			break;
 		}
-		column_temp[hikisuu_x - 1] |= 1 << hikisuu_y;
+		column_fix[hikisuu_x - 1] |= 1 << hikisuu_y;
 		break;
 	case 3:		//West
 		if (hikisuu_y == 15) {
 			break;
 		}
-		row_temp[hikisuu_y] |= 32768 >> hikisuu_x;
+		row_fix[hikisuu_y] |= 32768 >> hikisuu_x;
 		break;
 	}
 }
@@ -874,25 +901,25 @@ void add_saved_wall_left(int hikisuu_x, int hikisuu_y, int hikisuu_direction_cou
 		if (hikisuu_x == 0) {
 			break;
 		}
-		column_temp[hikisuu_x - 1] |= 0x0001 << hikisuu_y;
+		column_fix[hikisuu_x - 1] |= 0x0001 << hikisuu_y;
 		break;
 	case 1:		//East
 		if (hikisuu_y == 15) {
 			break;
 		}
-		row_temp[hikisuu_y] |= 0x8000 >> hikisuu_x;
+		row_fix[hikisuu_y] |= 0x8000 >> hikisuu_x;
 		break;
 	case 2:		//South
 		if (hikisuu_x == 15) {
 			break;
 		}
-		column_temp[hikisuu_x] |= 0x0001 << hikisuu_y;
+		column_fix[hikisuu_x] |= 0x0001 << hikisuu_y;
 		break;
 	case 3:		//West
 		if (hikisuu_y == 0) {
 			break;
 		}
-		row_temp[hikisuu_y - 1] |= 0x8000 >> hikisuu_x;
+		row_fix[hikisuu_y - 1] |= 0x8000 >> hikisuu_x;
 		break;
 	}
 }
@@ -945,7 +972,7 @@ char is_saved_wall_watched(char hikisuu_x, char hikisuu_y,
 	volatile unsigned short Wall_Judge_watched = 0;
 	switch (hikisuu_direction_count) {
 	case 0:	//North
-		Wall_Judge_watched = row_watched_temp[hikisuu_y] & 0x8000 >> hikisuu_x;
+		Wall_Judge_watched = row_watched_fix[hikisuu_y] & 0x8000 >> hikisuu_x;
 		if (Wall_Judge_watched == 0x8000 >> hikisuu_x) {
 			Wall_Judge_watched = 1;
 		} else {
@@ -953,7 +980,7 @@ char is_saved_wall_watched(char hikisuu_x, char hikisuu_y,
 		}
 		break;
 	case 1:	//East
-		Wall_Judge_watched = column_watched_temp[hikisuu_x]
+		Wall_Judge_watched = column_watched_fix[hikisuu_x]
 				& 0x0001 << hikisuu_y;
 		if (Wall_Judge_watched == 0x0001 << hikisuu_y) {
 			Wall_Judge_watched = 1;
@@ -962,7 +989,7 @@ char is_saved_wall_watched(char hikisuu_x, char hikisuu_y,
 		}
 		break;
 	case 2:	//South
-		Wall_Judge_watched = row_watched_temp[hikisuu_y - 1]
+		Wall_Judge_watched = row_watched_fix[hikisuu_y - 1]
 				& 0x8000 >> hikisuu_x;
 		if (Wall_Judge_watched == 0x8000 >> hikisuu_x) {
 			Wall_Judge_watched = 1;
@@ -971,7 +998,7 @@ char is_saved_wall_watched(char hikisuu_x, char hikisuu_y,
 		}
 		break;
 	case 3:	//West
-		Wall_Judge_watched = column_watched_temp[hikisuu_x - 1]
+		Wall_Judge_watched = column_watched_fix[hikisuu_x - 1]
 				& 0x0001 << hikisuu_y;
 		if (Wall_Judge_watched == 0x0001 << hikisuu_y) {
 			Wall_Judge_watched = 1;
@@ -982,6 +1009,62 @@ char is_saved_wall_watched(char hikisuu_x, char hikisuu_y,
 	}
 	return Wall_Judge_watched;
 }
+
+void slalom_for_tuning(float hikisuu_angle, float angle1, float angle2, float omega_max,
+		float hikisuu_angacc, float unclock_wise,
+		float hikisuu_balance_velocity, float dist1, float dist2) {	//壁制御無し
+	ideal_angle = 0.0;
+	ideal_omega = 0.0;
+	ideal_omega2 = 0.0;	//必要。
+	Erorr_rot.i = 0.0;
+	q_dist_flag = 0;
+	ei_flag_center = 1;
+	test_daikei(dist1, hikisuu_balance_velocity, 10.0, hikisuu_balance_velocity,
+			hikisuu_balance_velocity, 0);
+	ei_flag_rot = 1;
+	ideal_balance_velocity = hikisuu_balance_velocity;
+	wall_control = 0;
+	ideal_omega = 0.0;
+	if (angle1 < ((omega_max * omega_max) / 2.0 / hikisuu_angacc)) { //普通にスラローム
+		while (1) {
+			if (fail_flag == 1) {	//failセーフ
+				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
+				LED_V1 = 1;
+				LED_V2 = 1;
+				LED_V3 = 1;
+				LED_V4 = 1;
+				break;	//slalomの関数を抜けられる
+			}
+
+			if (fabs(ideal_angle) < angle1) {
+				ideal_angacc = unclock_wise * hikisuu_angacc;
+			} else if (fabs(ideal_angle) >= angle1
+					&& fabs(ideal_angle) <= angle2) {
+				ideal_angacc = 0.0;
+			} else if (fabs(ideal_angle) > angle2
+					&& fabs(ideal_angle) < hikisuu_angle) {
+				ideal_angacc = -1.0 * unclock_wise * hikisuu_angacc;
+				if (unclock_wise * ideal_omega <= 0.0) {	//実際の速度が負となったら台形加速終了
+					ideal_angacc = 0.0;
+					ideal_omega = 0.0;
+					break;
+				}
+			} else if (fabs(ideal_angle) > hikisuu_angle) {	//理想速度が0以下となる瞬間に速度を0とする
+				ideal_angacc = 0.0;
+				ideal_omega = 0.0;
+				break;
+			}
+		}
+	} else {
+
+	}
+	Erorr_rot.i = 0.0;
+	test_daikei(dist2, hikisuu_balance_velocity, 10.0, hikisuu_balance_velocity,
+			hikisuu_balance_velocity, 0);
+	ei_flag_center = 0;
+	ei_flag_rot = 0;
+}
+
 
 void temp_test_mazedata(){
 //以下、学生大会迷路(watched wallの情報がないが、これは今回はパス生成に不要。)
