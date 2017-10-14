@@ -1081,7 +1081,6 @@ void temp_test_mazedata(){
 	column_temp[12]=10752;
 	column_temp[13]=14096;
 	column_temp[14]=30720;
-	column_temp[15]=65535;
 	row_temp[0]=24574;
 	row_temp[1]=44831;
 	row_temp[2]=25326;
@@ -1097,7 +1096,6 @@ void temp_test_mazedata(){
 	row_temp[12]=5592;
 	row_temp[13]=2848;
 	row_temp[14]=1854;
-	row_temp[15]=32009;
 
 	column_temp[0]=32009;
 	column_temp[1]=60116;
@@ -1114,7 +1112,6 @@ void temp_test_mazedata(){
 	column_temp[12]=10752;
 	column_temp[13]=14096;
 	column_temp[14]=30720;
-	column_temp[15]=65535;
 	row_temp[0]=24574;
 	row_temp[1]=44831;
 	row_temp[2]=25326;
@@ -1130,6 +1127,5 @@ void temp_test_mazedata(){
 	row_temp[12]=5592;
 	row_temp[13]=2848;
 	row_temp[14]=1854;
-	row_temp[15]=32009;
 }
 

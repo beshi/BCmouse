@@ -35,8 +35,8 @@
 //#define Kp_wall 0.00005
 #define DIFF_THRESHOLD 15.0//30.0
 #define DIFF_WALL_THRE 100.0
-#define sen_right_refer 1380 //2000
-#define sen_left_refer 1720 //1520
+#define sen_right_refer 1480 //2000
+#define sen_left_refer 2150 //1520
 #define r_threshold 1000//1500	//1400
 #define l_threshold 900//1000	//900
 #define r_wall_judge 800
@@ -45,8 +45,9 @@
 #define x_size 15
 #define y_size 15
 #define GOAL_X 7
-#define GOAL_Y 7
-#define SAMPLE_NUMBER 1000
+#define GOAL_Y 5
+#define SAMPLE_NUMBER 800
+#define LOG_NUMBER 180
 
 volatile typedef struct { /* 構造体の型枠を定義して，同時にそれを型名 velocty_t として定義する */
 	float right;
@@ -76,7 +77,7 @@ volatile typedef struct {
 	unsigned short temp;
 	unsigned short fixed;
 } unsigned_short_fix_t;
-volatile typedef struct turn_parameters{	/*構造体turn_parametersを宣言し、変数としてturn_parameters_tを確保する*/
+volatile typedef struct turn_parameters { /*構造体turn_parametersを宣言し、変数としてturn_parameters_tを確保する*/
 	float theta;	//ターン角度
 	float th1;	//角速度加速区間
 	float th2;	//角速度減速区間
@@ -89,7 +90,7 @@ volatile typedef struct turn_parameters{	/*構造体turn_parametersを宣言し�
 	char enable;	//パラメータは使えるか
 } turn_parameters_t;
 
-volatile typedef struct turn_velocities{
+volatile typedef struct turn_velocities {
 	struct turn_parameters P_1_0;
 	struct turn_parameters P_1_1;
 	struct turn_parameters P_1_2;
@@ -109,12 +110,37 @@ volatile typedef struct turn_velocities{
 
 } turn_velocities_t;
 
+volatile typedef struct sbits {
+	unsigned char bit1 :1;	//最下位ビット
+	unsigned char bit2 :1;
+	unsigned char bit3 :1;
+	unsigned char bit4 :1;
+	unsigned char bit5 :1;
+	unsigned char bit6 :1;
+	unsigned char bit7 :1;
+	unsigned char bit8 :1;	//最上位ビット
+} bits_t;
+
+volatile typedef struct skabekire {
+	unsigned char next_r :1;	//読むべき方向//最下位ビット
+	unsigned char next_l :1;	//読むべき方向
+	unsigned char enable1 :1;//
+	unsigned char enable2 :1;
+	unsigned char wait :1;
+	unsigned char detect_r :1;	//右を検出
+	unsigned char detect_l :1;	//左を検出
+	unsigned char detected :1;	//最上位ビット
+} kabekire_t;
+
 extern volatile unsigned int queue[700];
 extern volatile unsigned char sample_flag, refer_flag, gyro_enable,
 		reference_fin, wall_control, ei_flag_center, ei_flag_rot,
 		direction_count, x, y, sensor_enable, q_dist_flag, kabekire_right,
 		kabekire_left, kabeiri_right, kabeiri_left, kabekire_enable,
-		kabekire_enable_2, kushi_judge, pass[200], motion[100], last_p_i,fail_flag;
+		kabekire_enable_2, kushi_judge, pass[200] , motion[100] ,
+		last_p_i, reverse_flag, pass_kabekire_straight, wait_kabekire,
+		kabekire_read_flag, fail_flag, sen_fail_flag, fail_count, ei_flag_wall,
+		goal_x, goal_y, temp_goal_x, temp_goal_y, daikei_mode;
 extern volatile int sen_bat, sen_l_f_ON, sen_l_s_ON, sen_r_f_ON, sen_r_s_ON,
 		sen_l_f_OFF, sen_l_s_OFF, sen_r_f_OFF, sen_r_s_OFF, gptcount_l,
 		gptcount_r, sample_count, refer_count, buff_sen_right[10],
@@ -125,13 +151,17 @@ extern volatile unsigned short map[16][16], row_temp[15], column_temp[15],
 		level[16][15], vertical[15][16];
 
 extern volatile long cmt_count;
-extern volatile float Battery, dutty_r, dutty_l, omega, angle, reference_omega,
-		diff_omega[3], ideal_omega, ideal_omega2, ideal_angle, ei_r, ei_l, ideal_angacc,
-		balance_velocity, balance_distance, ideal_balance_velocity,
-		ideal_balance_accel, ideal_balance_distance, diff_balance_velocity[3],
-		Error, Kp_wall_r, Kp_wall_l, EI_keisuu, EP_keisuu,
-		pre_buff_sen_right[10], pre_buff_sen_left[10], pre_kabe_ave_right,
-		pre_kabe_ave_left, pre_ave_ave_right, pre_ave_ave_left;
+extern volatile float Battery, dutty_r , dutty_l , omega , angle ,
+		reference_omega , diff_omega[3] , diff_kabe[3] ,
+		ideal_omega , ideal_omega2 , ideal_angle, ideal_angacc ,
+		balance_velocity, balance_distance , ideal_balance_velocity ,
+		ideal_balance_accel , ideal_balance_distance ,
+		diff_balance_velocity[3], Error, Kp_wall_r, Kp_wall_l, EI_keisuu ,
+		EP_keisuu , pre_buff_sen_right[10] ,
+		pre_buff_sen_left[10] , pre_kabe_ave_right ,
+		pre_kabe_ave_left , pre_ave_ave_right ,
+		pre_ave_ave_left , d_i , adjust_before_dist ,
+		adjust_distance ;
 extern volatile float_rightleft_t velocity, total_distance, accel, old_velocity,
 		ideal_velocity, ideal_accel, ideal_distance, diff_velocity[3], dutty,
 		dutty_foward, average_sensor, diff_average_sensor, average_sensor_old;
@@ -141,6 +171,7 @@ extern volatile float_highlow_t gyro_x, gyro_y, gyro_z, accel_x, accel_y,
 extern volatile float_pid_t K_center, K_rot, Erorr_center, Erorr_rot;
 extern volatile int_sensor_t sen;
 extern volatile unsigned_short_fix_t a;
+extern volatile const turn_velocities_t turn[7];
 
 /*
  extern volatile unsigned char sample_flag, refer_flag, gyro_enable,
