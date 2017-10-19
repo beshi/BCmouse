@@ -54,8 +54,10 @@ void adachihou_q(int hikisuu_goal_x, int hikisuu_goal_y, int start_x,
 void adachihou2_q(char hikisuu_goal_x, char hikisuu_goal_y, char start_x,
 		char start_y, char para_mode);
 void make_pass(int hikisuu_goal_x, int hikisuu_goal_y);
+void move_xy_skew(char hikisuu_v_l, char hikisuu_direction);
 void convert_pass_skew(void);
-void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_mode);
+void exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode);
+void temp_exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode);
 void q_walk_map_maker(int hikisuu_goal_x, int hikisuu_goal_y);
 void q_saved_walk_map_maker( hikisuu_goal_x, hikisuu_goal_y);
 void skew_queue_walkmap_maker(char hikisuu_goal_x, char hikisuu_goal_y);
@@ -85,7 +87,7 @@ volatile unsigned char sample_flag = 0, refer_flag = 0, gyro_enable = 0,
 		ei_flag_rot = 0, direction_count, x, y, sensor_enable = 0, q_dist_flag =
 				0, kabekire_right = 0, kabekire_left = 0, kabeiri_right = 0,
 		kabeiri_left = 0, kabekire_enable = 0, kabekire_enable_2 = 0,
-		kushi_judge = 0, pass[200] = { 0 }, motion[100] = { 0 }, last_p_i,
+		kushi_judge = 0, pass[200] = { 0 }, motion[100] = { 0 }, direc[200] = { 0 }, last_p_i,
 		reverse_flag = 0, pass_kabekire_straight = 0, wait_kabekire = 0,
 		kabekire_read_flag = 0, fail_flag = 0, sen_fail_flag = 0,
 		fail_count = 0, ei_flag_wall = 0, goal_x, goal_y, temp_goal_x,
@@ -147,22 +149,22 @@ volatile const turn_velocities_t turn[7] = {//[0]:重心速度500  [1]:重心速
 				{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 0 } //斜め→左V90°ターン
 		}, {
 			  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
-				{  90.0,  30.0,  60.0, 7500.0,  -1.0,   4.0,   8.0,  650.0,    0,     1 }, //右小回り
-				{  90.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //右大回り
-				{ 180.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //右Uターン
-				{  45.0,  22.0,  23.0, 7360.0,  -1.0,  42.2,  71.5,  650.0,    1,     0 }, //右45°ターン→斜め
-				{ 135.0,  27.0, 108.0, 6050.0,  -1.0,  87.0,  70.0,  650.0,    1,     0 }, //右135°ターン→斜め
-				{  45.0,  22.0,  23.0, 7360.0,  -1.0,  72.2,  39.0,  650.0,    1,     0 }, //斜め→右45°ターン
-				{ 135.0,  27.0, 108.0, 6050.0,  -1.0,  76.0, 100.0,  650.0,    1,     0 }, //斜め→右135°ターン
-				{  90.0,  30.0,  60.0, 7500.0,  -1.0,  40.0,  45.0,  650.0,    1,     0 }, //斜め→右V90°ターン
-				{  90.0,  33.0,  57.0, 8320.0,   1.0,   5.0,  25.0,  650.0,    0,     1 }, //左小回り
-				{  90.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //左大回り
-				{ 180.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //左Uターン
-				{  45.0,  22.0,  23.0, 7360.0,   1.0,  30.0,  86.5,  650.0,    1,     0 }, //左45°ターン→斜め
-				{ 135.0,  27.0, 108.0, 6050.0,   1.0,  87.0,  87.0,  650.0,    1,     0 }, //左135°ターン→斜め
-				{  45.0,  22.0,  23.0, 7360.0,   1.0,  67.0,  50.0,  650.0,    1,     0 }, //斜め→左45°ターン
-				{ 135.0,  27.0, 108.0, 6050.0,   1.0,  74.0, 104.0,  650.0,    1,     0 }, //斜め→左135°ターン
-				{  90.0,  33.0,  57.0, 8320.0,   1.0,  39.0,  68.0,  650.0,    1,     0 } //斜め→左V90°ターン
+				{  90.0,  30.0,  60.0, 7500.0,  -1.0,   4.0,   8.0,  650.0,    0,     1 }, //0.右小回り
+				{  90.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //1.右大回り
+				{ 180.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //2.右Uターン
+				{  45.0,  22.0,  23.0, 7360.0,  -1.0,  42.2,  71.5,  650.0,    1,     0 }, //3.右45°ターン→斜め
+				{ 135.0,  27.0, 108.0, 6050.0,  -1.0,  87.0,  70.0,  650.0,    1,     0 }, //4.右135°ターン→斜め
+				{  45.0,  22.0,  23.0, 7360.0,  -1.0,  72.2,  39.0,  650.0,    1,     0 }, //5.斜め→右45°ターン
+				{ 135.0,  27.0, 108.0, 6050.0,  -1.0,  76.0, 100.0,  650.0,    1,     0 }, //6.斜め→右135°ターン
+				{  90.0,  30.0,  60.0, 7500.0,  -1.0,  40.0,  45.0,  650.0,    1,     0 }, //7.斜め→右V90°ターン
+				{  90.0,  33.0,  57.0, 8320.0,   1.0,   5.0+5.0,  25.0-4.0,  650.0,    0,     1 }, //8.左小回り
+				{  90.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //9.左大回り
+				{ 180.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0,  650.0,    0,     0 }, //10.左Uターン
+				{  45.0,  22.0,  23.0, 7360.0,   1.0,  30.0,  86.5,  650.0,    1,     0 }, //11.左45°ターン→斜め
+				{ 135.0,  27.0, 108.0, 6050.0,   1.0,  87.0,  87.0,  650.0,    1,     0 }, //12.左135°ターン→斜め
+				{  45.0,  22.0,  23.0, 7360.0,   1.0,  67.0,  50.0,  650.0,    1,     0 }, //13.斜め→左45°ターン
+				{ 135.0,  27.0, 108.0, 6050.0,   1.0,  74.0, 104.0,  650.0,    1,     0 }, //14.斜め→左135°ターン
+				{  90.0,  33.0,  57.0, 8320.0,   1.0,  39.0,  68.0,  650.0,    1,     0 }  //15.斜め→左V90°ターン
 		}, {
 		/*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
 				{ 90.0, 41.0, 49.0, 9240.0, -1.0, 0.0, 18.0, 750.0, 0, 0 }, //右小回り
@@ -275,23 +277,23 @@ void assign_parameters(char para_mode) {
 	} else if (para_mode == 2) {
 		vel_low = 650.0;
 		vel_high = 800.0;
-		accel_normal = 5000.0;
+		accel_normal = 6000.0;
 		aa = 1;	//速度650
 		bb = 3;	//速度800
 		cc = 1;	//斜め速度650
 	} else if (para_mode == 3) {
+		vel_low = 750.0;
+		vel_high = 800.0;
+		accel_normal = 7000.0;
+		aa = 2;	//速度750
+		bb = 3;	//速度900
+		cc = 1;	//斜め速度650
+	} else if (para_mode == 4) {
 		vel_low = 650.0;
 		vel_high = 650.0;
 		accel_normal = 5000.0;
 		aa = 1;	//速度650
 		bb = 1;	//速度650
-		cc = 1;	//斜め速度650
-	} else if (para_mode == 4) {
-		vel_low = 750.0;
-		vel_high = 800.0;
-		accel_normal = 6000.0;
-		aa = 2;	//速度750
-		bb = 3;	//速度900
 		cc = 1;	//斜め速度650
 	}
 
@@ -643,27 +645,27 @@ float kabekire_dist_right(float hikisuu_vel) {
 	float adjust_right;
 	if (daikei_mode == 1) {	//探索用
 		if (hikisuu_vel <= 500.0) {
-			adjust_right = 81.5;	//84
+			adjust_right = 78.0;	//84
 		} else if (hikisuu_vel <= 700.0) {
-			adjust_right = 82.0;	//。
+			adjust_right = 79.0;	//。
 		} else if (hikisuu_vel <= 800.0) {
-			adjust_right = 83.0;	//。
+			adjust_right = 80.0;	//。
 		} else if (hikisuu_vel <= 1000.0) {
-			adjust_right = 89.0;	//。
+			adjust_right = 85.0;	//。
 		} else if (hikisuu_vel > 1000.0) {
-			adjust_right = 96.0;	//これはテキトー。
+			adjust_right = 92.0;	//これはテキトー。
 		}
 	} else if (daikei_mode == 2) {
 		if (hikisuu_vel <= 500.0) {
-			adjust_right = 8.5;
+			adjust_right = 12.0;
 		} else if (hikisuu_vel <= 700.0) {
-			adjust_right = 6.0;	//これはテキトー。
+			adjust_right = 11.0;	//これはテキトー。
 		} else if (hikisuu_vel <= 800.0) {
-			adjust_right = 8.0;	//これはテキトー。
+			adjust_right = 10.0;	//これはテキトー。
 		} else if (hikisuu_vel <= 1000.0) {
-			adjust_right = 1.0;	//。
+			adjust_right = 5.0;	//。
 		} else if (hikisuu_vel > 1000.0) {
-			adjust_right = -6.0;	//これはテキトー。
+			adjust_right = -2.0;	//これはテキトー。
 		}
 	}
 
@@ -673,27 +675,27 @@ float kabekire_dist_left(float hikisuu_vel) {
 	float adjust_left;
 	if (daikei_mode == 1) {	//探索用
 		if (hikisuu_vel <= 500.0) {
-			adjust_left = 97.0;	//87.0
+			adjust_left = 93.0;	//87.0
 		} else if (hikisuu_vel <= 700.0) {
-			adjust_left = 98.0;	//。
+			adjust_left = 94.0;	//。
 		} else if (hikisuu_vel <= 800.0) {
-			adjust_left = 99.0;	//。
+			adjust_left = 95.0;	//。
 		} else if (hikisuu_vel <= 1000.0) {
-			adjust_left = 106.0;	//。
+			adjust_left = 102.0;	//。
 		} else if (hikisuu_vel > 1000.0) {
-			adjust_left = 110.0;	//これはテキトー。
+			adjust_left = 107.0;	//これはテキトー。
 		}
 	} else if (daikei_mode == 2) {
 		if (hikisuu_vel <= 500.0) {
-			adjust_left = -7.0;
+			adjust_left = -3.0;
 		} else if (hikisuu_vel <= 700.0) {
-			adjust_left = -8.0;	//これはテキトー。
+			adjust_left = -4.0;	//これはテキトー。
 		} else if (hikisuu_vel <= 800.0) {
-			adjust_left = -9.0;	//これはテキトー。
+			adjust_left = -5.0;	//これはテキトー。
 		} else if (hikisuu_vel <= 1000.0) {
-			adjust_left = -16.0;	//。
+			adjust_left = -12.0;	//。
 		} else if (hikisuu_vel > 1000.0) {
-			adjust_left = -20.0;	//これはテキトー。
+			adjust_left = -17.0;	//これはテキトー。
 		}
 	}
 
@@ -1000,26 +1002,27 @@ void daikei_for_pass_EX(float hikisuu_dist, float vmax, float hikisuu_accel,
 				ideal_balance_accel = hikisuu_accel;
 			} else if (ideal_balance_distance
 					> run_dist / 2.0
-							+ (vterm * vterm - v_0 * v_0) / 4.0 / hikisuu_accel
-							/*&& ideal_balance_distance < hikisuu_dist*/) {
-				if (flags_kabekire.wait == 1 && flags_kabekire.detected == 0
-						&& hikisuu_kebekire == 1) {	//壁切れを読むまで待つ!!!hikisuu_kebekire==1は必要（前距離等での誤動作防止10/10）
-					ideal_balance_accel = 0.0;
-					ideal_balance_velocity = vterm;
-				}else{
+							+ (vterm * vterm - v_0 * v_0) / 4.0 / hikisuu_accel) {
+
 					ideal_balance_accel = -1.0 * hikisuu_accel;
+
 					if (balance_velocity <= 0.0) {	//実際の速度が負となったら台形加速終了
 						ideal_balance_accel = 0.0;
 						ideal_balance_velocity = 0.0;
 						break;
 					}
-					if (balance_distance > run_dist) {	//走行距離が理想値を超えたらbreak
-						ideal_balance_accel = 0.0;
-						break;
+					if (balance_distance > hikisuu_dist) {	//走行距離が理想値を超えたらbreak
+						if (flags_kabekire.wait == 1 && flags_kabekire.detected == 0
+								&& hikisuu_kebekire == 1) {	//壁切れを読むまで待つ!!!hikisuu_kebekire==1は必要（前距離等での誤動作防止10/10）
+							ideal_balance_accel = 0.0;
+							ideal_balance_velocity = vterm;
+						}else{
+							ideal_balance_accel = 0.0;
+							ideal_balance_velocity = vterm;
+							break;
+						}
 					}
-				}
-			}
-			/*else if (ideal_balance_distance > hikisuu_dist) {	//理想速度が0以下となる瞬間に速度を0とする
+			}			/*else if (ideal_balance_distance > hikisuu_dist) {	//理想速度が0以下となる瞬間に速度を0とする
 			 ideal_balance_accel = 0.0;
 			 //				ideal_balance_velocity = 0.0;	//後にslalom関数などが続くことを考えて、速度ゼロにはしない
 			 break;
@@ -1061,21 +1064,23 @@ void daikei_for_pass_EX(float hikisuu_dist, float vmax, float hikisuu_accel,
 							- (vmax * vmax - vterm * vterm) / 2.0
 									/ hikisuu_accel)) {
 
-				if (flags_kabekire.wait == 1 && flags_kabekire.detected == 0
-						&& hikisuu_kebekire == 1) {	//壁切れを読むまで待つ!!!hikisuu_kebekire==1は必要（前距離等での誤動作防止10/10）
+				ideal_balance_accel = -1.0 * hikisuu_accel;
+				if (balance_velocity <= 0.0) {	//実際の速度が負となったら台形加速終了
 					ideal_balance_accel = 0.0;
-					ideal_balance_velocity = vterm;
-
-				} else {
-					ideal_balance_accel = -1.0 * hikisuu_accel;
-					if (balance_velocity <= 0.0) {	//実際の速度が負となったら台形加速終了
+					ideal_balance_velocity = 0.0;
+					break;
+				}
+				if (balance_distance > hikisuu_dist) {	//走行距離が理想値を超えたらbreak
+					ideal_balance_accel = 0.0;
+					if (flags_kabekire.wait == 1 && flags_kabekire.detected == 0
+							&& hikisuu_kebekire == 1) {	//壁切れを読むまで待つ!!!hikisuu_kebekire==1は必要（前距離等での誤動作防止10/10）
 						ideal_balance_accel = 0.0;
-						ideal_balance_velocity = 0.0;
+						ideal_balance_velocity = vterm;
+					} else {
+						ideal_balance_accel = 0.0;
+						ideal_balance_velocity = vterm;
 						break;
 					}
-					if (balance_distance > hikisuu_dist) {	//走行距離が理想値を超えたらbreak
-						ideal_balance_accel = 0.0;
-
 //						LED_V4 = 1;//debug1001
 //						if (kabekire_read_flag == 0) {//debug1001
 //							LED_V2 = 1;
@@ -1083,8 +1088,6 @@ void daikei_for_pass_EX(float hikisuu_dist, float vmax, float hikisuu_accel,
 //						if (wait_kabekire == 1) {//debug1001
 //							LED_V1 = 1;
 //						}
-						break;
-					}
 				}
 			}
 		}
@@ -1573,7 +1576,7 @@ void turn_for_skew_pass(float hikisuu_angle, float angle1, float angle2,
 
 	}
 	daikei_for_pass_EX(dist2, hikisuu_v_term, 6000.0,
-			hikisuu_v_skew, hikisuu_v_term, 0, 0);	//壁切れ読む	//v_termの方が大きいと想定
+			hikisuu_v_skew, hikisuu_v_term, 0, 1);	//壁切れ読む	//v_termの方が大きいと想定
 	ei_flag_center = 0;
 	ei_flag_rot = 0;
 }
@@ -2215,7 +2218,7 @@ void adachihou2_q(char hikisuu_goal_x, char hikisuu_goal_y, char start_x,
 
 				while (1) {	//何区画既知区間を直進するか数える
 					straight_count++;
-					if (y < 15
+					if (x < 15
 							&& map[x + straight_count][y]
 									== map[x][y] - straight_count
 							&& is_the_Wall_watched(x + straight_count, y, 3) == 1
@@ -2292,7 +2295,7 @@ void adachihou2_q(char hikisuu_goal_x, char hikisuu_goal_y, char start_x,
 
 				while (1) {	//何区画既知区間を直進するか数える
 					straight_count++;
-					if (y < 15
+					if (y > 0
 							&& map[x][y - straight_count]
 									== map[x][y] - straight_count
 							&& is_the_Wall_watched(x, y - straight_count, 0) == 1
@@ -2304,7 +2307,7 @@ void adachihou2_q(char hikisuu_goal_x, char hikisuu_goal_y, char start_x,
 				}
 				if(straight_count > 1){
 					test_daikei(180.0 * straight_count, V_max, 3000.0, V_search, V_search, 1);
-				}else{
+				} else {
 					test_daikei(180.0, V_search, 3000.0, V_search, V_search, 1);
 				}
 
@@ -2370,7 +2373,7 @@ void adachihou2_q(char hikisuu_goal_x, char hikisuu_goal_y, char start_x,
 
 				while (1) {	//何区画既知区間を直進するか数える
 					straight_count++;
-					if (y < 15
+					if (x > 0
 							&& map[x - straight_count][y]
 									== map[x][y] - straight_count
 							&& is_the_Wall_watched(x - straight_count, y, 1) == 1
@@ -2666,6 +2669,579 @@ void make_pass(int hikisuu_goal_x, int hikisuu_goal_y) {		//パスの作成（�
 	}
 }
 
+void move_xy_skew(char hikisuu_v_l, char hikisuu_direction){	//移動後の値を代入
+	if(hikisuu_v_l==0){	//移動前level
+		switch (hikisuu_direction){	//移動後の方向を代入
+		case 0:
+			y++;
+			break;
+		case 1:
+			y++;
+			break;
+		case 3:
+				//そのまま
+			break;
+		case 4:
+			y--;
+			break;
+		case 5:
+			x--;
+			break;
+		case 7:
+			x--;
+			y++;
+			break;
+
+		}
+
+	}else{	//移動前vertcal
+		switch (hikisuu_direction){	//移動後の方向を代入
+		case 1:
+			x++;
+			break;
+		case 2:
+			x++;
+			break;
+		case 3:
+			x++;
+			y--;
+			break;
+		case 5:
+			y--;
+			break;
+		case 6:
+			x--;
+			break;
+		case 7:
+			//そのまま
+			break;
+		}
+	}
+}
+
+void MAKE_PASS_SKEW(char hikisuu_goal_x, char hikisuu_goal_y){
+	volatile char l_v_judge = 0, nn = 0, nn_dir=0;
+
+	direc[0] = 0;	//最初は北を向いているものとする。
+	l_v_judge = 0;	//最初はlevelにいるものとする。
+
+	skew_queue_walkmap_maker(hikisuu_goal_x, hikisuu_goal_y);
+
+	while(1){
+		myprintf("x=%d\n\r", x);
+		myprintf("y=%d\n\r", y);
+		myprintf("l_v_judge=%d\n\r", l_v_judge);
+		myprintf("direc[%d]=%d\n\r", nn_dir, direc[nn_dir]);
+		myprintf("pass[%d]=%d\n\r", nn, pass[nn]);
+		myprintf("\n\r");
+
+
+		if (l_v_judge == 0 && (direc[nn_dir] == 7 || direc[nn_dir] == 0 || direc[nn_dir] == 1)) {	//Case 1
+
+			if (y < 14 && level[x][y + 1] == level[x][y] - 7) {	//level → level北向き
+
+				direc[nn_dir+1] = 0;	//level 北向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 0;	//level
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (pass[nn] <= 30) {
+						pass[nn] = pass[nn] + 2;	//直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 2;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == -1) {
+					pass[nn+1] = 55;	//左45度
+					nn++;
+					pass[nn+1] = 2;
+				} else {
+					pass[nn+1] = 45;	//右45度
+					nn++;
+					pass[nn+1] = 2;
+				}
+			}else if(x < 15 && y < 15 && vertical[x][y + 1] == level[x][y] - 5){		//level →　vertical北東向き
+
+				direc[nn_dir+1] = 1;	//vertical 北東向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 1;	//vertical
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (200 <= pass[nn] && pass[nn] <= 230) {
+						pass[nn] = pass[nn] + 1;	//斜め直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 201;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == 1) {
+					pass[nn+1] = 45;	//右45度
+					nn++;
+					pass[nn+1] = 201;
+				} else {
+					pass[nn+1] = 40;	//右90度
+					nn++;
+					pass[nn+1] = 201;
+				}
+
+			}else if(x > 0 && y < 15 && vertical[x-1][y + 1] == level[x][y] - 5){		//level →　vertival北西向き
+
+				direc[nn_dir+1] = 7;	//vertical 北西向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 1;	//vertical
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (200 <= pass[nn] && pass[nn] <= 230) {
+						pass[nn] = pass[nn] + 1;	//斜め直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 201;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == 7) {
+					pass[nn+1] = 55;	//左45度
+					nn++;
+					pass[nn+1] = 201;
+				} else {
+					pass[nn+1] = 50;	//左90度
+					nn++;
+					pass[nn+1] = 201;
+				}
+
+			}
+
+		} else if (l_v_judge == 0 && (direc[nn_dir] == 3 || direc[nn_dir] == 4 || direc[nn_dir] == 5)) {	//Case 2
+			if(y < 15 && y > 0 && level[x][y - 1] == level[x][y] - 7){	//level → level南向き
+				direc[nn_dir+1] = 4;	//level 南向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 0;	//level
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (pass[nn] <= 30) {
+						pass[nn] = pass[nn] + 2;	//直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 2;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == -1) {
+					pass[nn+1] = 55;	//左45度
+					nn++;
+					pass[nn+1] = 2;
+				} else {
+					pass[nn+1] = 45;	//右45度
+					nn++;
+					pass[nn+1] = 2;
+				}
+
+			}else if(x < 15 && y < 15 && vertical[x][y] == level[x][y] - 5){	//level →　vertical南東向き
+
+				direc[nn_dir+1] = 3;	//vertical 南東向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 1;	//vertical
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (200 <= pass[nn] && pass[nn] <= 230) {
+						pass[nn] = pass[nn] + 1;	//斜め直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 201;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == -1) {
+					pass[nn+1] = 55;	//左45度
+					nn++;
+					pass[nn+1] = 201;
+				} else {
+					pass[nn+1] = 50;	//左90度
+					nn++;
+					pass[nn+1] = 201;
+				}
+
+			}else if(x > 0 && y < 15 && vertical[x-1][y] == level[x][y] - 5){		//level →　vertival南西向き
+				direc[nn_dir+1] = 5;	//vertical 南西向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 1;	//vertical
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (200 <= pass[nn] && pass[nn] <= 230) {
+						pass[nn] = pass[nn] + 1;	//斜め直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 201;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == 1) {
+					pass[nn+1] = 45;	//右45度
+					nn++;
+					pass[nn+1] = 201;
+				} else {
+					pass[nn+1] = 40;	//右90度
+					nn++;
+					pass[nn+1] = 201;
+				}
+
+			}
+
+		} else if (l_v_judge == 1 && (direc[nn_dir] == 1 || direc[nn_dir] == 2 || direc[nn_dir] == 3)) {	//Case 3
+			if(x < 14 && vertical[x+1][y] == vertical[x][y] - 7){	//vertical → vertical東向き
+				direc[nn_dir+1] = 2;	//vertical 東向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 1;	//vertical
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (pass[nn] <= 30) {
+						pass[nn] = pass[nn] + 2;	//直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 2;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == -1) {
+					pass[nn+1] = 55;	//左45度
+					nn++;
+					pass[nn+1] = 2;
+				} else {
+					pass[nn+1] = 45;	//右45度
+					nn++;
+					pass[nn+1] = 2;
+				}
+
+			}else if(x < 15 && y < 15 && level[x+1][y] == vertical[x][y] - 5){	//vertical →　level北東向き
+				direc[nn_dir+1] = 1;	//level 北東向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 0;	//level
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (200 <= pass[nn] && pass[nn] <= 230) {
+						pass[nn] = pass[nn] + 1;	//斜め直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 201;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == -1) {
+					pass[nn+1] = 55;	//左45度
+					nn++;
+					pass[nn+1] = 201;
+				} else {
+					pass[nn+1] = 50;	//左90度
+					nn++;
+					pass[nn+1] = 201;
+				}
+
+			}else if(x < 15 && y > 0 && level[x+1][y-1] == vertical[x][y] - 5){	//vertical →　level南東向き
+				direc[nn_dir+1] = 3;	//level 南東向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 0;	//level
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (200 <= pass[nn] && pass[nn] <= 230) {
+						pass[nn] = pass[nn] + 1;	//斜め直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 201;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == 1) {
+					pass[nn+1] = 45;	//右45度
+					nn++;
+					pass[nn+1] = 201;
+				} else {
+					pass[nn+1] = 40;	//右90度
+					nn++;
+					pass[nn+1] = 201;
+				}
+
+			}
+
+		} else if (l_v_judge == 1 && (direc[nn_dir] == 5 || direc[nn_dir] == 6 || direc[nn_dir] == 7)) {	//Case 4
+			if(x < 15 && x > 0 && vertical[x-1][y] == vertical[x][y] - 7){	//vertical → vertical西向き
+				direc[nn_dir+1] = 6;	//vertical 東向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 1;	//vertical
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (pass[nn] <= 30) {
+						pass[nn] = pass[nn] + 2;	//直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 2;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == -1) {
+					pass[nn+1] = 55;	//左45度
+					nn++;
+					pass[nn+1] = 2;
+				} else {
+					pass[nn+1] = 45;	//右45度
+					nn++;
+					pass[nn+1] = 2;
+				}
+
+			}else if(x < 15 && y< 15 && level[x][y] == vertical[x][y] - 5){
+				direc[nn_dir+1] = 7;	//level 北西向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 0;	//level
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (200 <= pass[nn] && pass[nn] <= 230) {
+						pass[nn] = pass[nn] + 1;	//斜め直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 201;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == 1) {
+					pass[nn+1] = 45;	//右45度
+					nn++;
+					pass[nn+1] = 201;
+				} else {
+					pass[nn+1] = 40;	//右90度
+					nn++;
+					pass[nn+1] = 201;
+				}
+
+			}else if(x < 15 && y > 0 && level[x][y-1] == vertical[x][y] - 5){
+				direc[nn_dir+1] = 5;	//vertical 南東向き
+				move_xy_skew(l_v_judge, direc[nn_dir+1]);	//斜めmap用座標情報を更新
+				l_v_judge = 0;	//level
+
+				if (direc[nn_dir+1] - direc[nn_dir] == 0) {
+					if (200 <= pass[nn] && pass[nn] <= 230) {
+						pass[nn] = pass[nn] + 1;	//斜め直進
+						nn--;	//次も直進ならnnのみ更新され、違うならnnは更新されないようにするため
+					} else {
+						pass[nn+1] = 201;
+					}
+				} else if (direc[nn_dir+1] - direc[nn_dir] == -1) {
+					pass[nn+1] = 55;	//左45度
+					nn++;
+					pass[nn+1] = 201;
+				} else {
+					pass[nn+1] = 50;	//左90度
+					nn++;
+					pass[nn+1] = 201;
+				}
+
+			}
+
+		}
+		if(level[x][y]==0 || vertical[x][y]==0){
+			last_p_i = nn + 1;
+			break;
+		}
+		nn_dir++;
+		nn++;	//必ず更新する(直進のみマイナスされているはず)
+
+	}
+}
+
+void CONVERT_SKEWMAP_PASS(){
+	volatile int read_p_i, motion_count, adjust_straight, thin = 0, s_count, j=0;
+
+	read_p_i = 0;
+	motion_count = 0;
+	adjust_straight = 0;
+	 if (pass[0] == 0 && pass[1] == 45 && pass[2] >= 201 && pass[2] <= 230
+			&& pass[3] == 40 && pass[4] >= 201 && pass[4] <= 230) {	//開幕右135°ターン→斜め
+		motion[motion_count] = 94;
+		motion_count++;
+		adjust_straight = -1;
+		read_p_i = read_p_i + 4;
+	} else if (pass[0] == 0 && pass[1] == 45 && pass[2] >= 201
+			&& pass[2] <= 230) {	//開幕左45°ターン→斜め
+		motion[motion_count] = 84;
+		motion_count++;
+		adjust_straight = -1;
+		read_p_i = read_p_i + 2;
+	} else if (pass[0] == 0 && pass[1] == 45 && pass[2] == 201 && pass[3] == 45
+			&& pass[4] >= 1 && pass[4] <= 30) {	//開幕右大回り→直進
+		motion[motion_count] = 74;
+		motion_count++;
+		adjust_straight = -1;
+		read_p_i = read_p_i + 4;
+	}
+	while(1){
+		myprintf("read_p_i=%d\n\r", read_p_i);
+		myprintf("motion_count=%d\n\r", motion_count);
+		myprintf("motion[%d]=%d\n\r", motion_count, motion[motion_count]);
+		myprintf("last_p_i=%d\n\r", last_p_i);
+		myprintf("\n\r");
+
+		if (pass[read_p_i] >= 1 && pass[read_p_i] <= 30
+				&& pass[read_p_i + 1] == 45
+				&& pass[read_p_i + 2] == 201
+				&& pass[read_p_i + 3] == 40
+				&& pass[read_p_i + 4] == 201
+				&& pass[read_p_i + 5] == 45
+				&& pass[read_p_i + 6] >= 1 && pass[read_p_i + 6] <= 30) {	//右の180度ターンの場合
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			motion_count++;
+			motion[motion_count] = 124;
+			adjust_straight = -1;
+			read_p_i = read_p_i + 6;
+
+		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30
+				&& pass[read_p_i + 1] == 55
+				&& pass[read_p_i + 2] >= 201
+				&& pass[read_p_i + 3] == 50
+				&& pass[read_p_i + 4] == 201
+				&& pass[read_p_i + 5] == 55
+				&& pass[read_p_i + 6] >= 1 && pass[read_p_i + 6] <= 30){	//左の180度ターンの場合
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			motion_count++;
+			motion[motion_count] = 125;
+			adjust_straight = -1;
+			read_p_i = read_p_i + 6;
+
+		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30
+				&& pass[read_p_i + 1] == 45
+				&& pass[read_p_i + 2] == 201
+				&& pass[read_p_i + 3] == 45
+				&& pass[read_p_i + 4] >= 1 && pass[read_p_i + 4] <= 30){	//右の大廻ターンの場合
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			motion_count++;
+			motion[motion_count] = 114;
+			adjust_straight = -1;	//ターンの後ろ側の直進分を記憶し、次のmotionの直進部に反映させる
+			read_p_i = read_p_i + 4;	//次のpassの読み込み位置
+
+		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30
+				&& pass[read_p_i + 1] == 55
+				&& pass[read_p_i + 2] == 201
+				&& pass[read_p_i + 3] == 55
+				&& pass[read_p_i + 4] >= 1 && pass[read_p_i + 4] <= 30){	//左の大廻ターンの場合
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			motion_count++;
+			motion[motion_count] = 115;
+			adjust_straight = -1;	//ターンの後ろ側の直進分を記憶し、次のmotionの直進部に反映させる
+			read_p_i = read_p_i + 4;	//次のpassの読み込み位置
+
+		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30
+				&& pass[read_p_i + 1] == 45
+				&& pass[read_p_i + 2] == 201
+				&& pass[read_p_i + 3] == 40
+				&& pass[read_p_i + 4] >= 201 && pass[read_p_i + 4] <= 230){	//右の135degターン→斜め
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			motion_count++;
+			motion[motion_count] = 144;
+			adjust_straight = -1;	//0
+			read_p_i = read_p_i + 4;
+
+		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30
+				&& pass[read_p_i + 1] == 55
+				&& pass[read_p_i + 2] == 201
+				&& pass[read_p_i + 3] == 50
+				&& pass[read_p_i + 4] >= 201 && pass[read_p_i + 4] <= 230){	//左の135degターン→斜め
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			motion_count++;
+			motion[motion_count] = 145;
+			adjust_straight = -1;	//0
+			read_p_i = read_p_i + 4;
+
+		}else if(pass[read_p_i] >= 201 && pass[read_p_i] <= 230
+				&& pass[read_p_i + 1] == 40
+				&& pass[read_p_i + 2] == 201
+				&& pass[read_p_i + 3] == 45
+				&& pass[read_p_i + 4] >= 1 && pass[read_p_i + 4] <= 30){	//斜め→右135°ターン
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			if(motion[motion_count]==200){
+				motion[motion_count]=0;
+			}
+			motion_count++;
+			motion[motion_count] = 164;
+			adjust_straight = -1;
+			read_p_i = read_p_i + 4;
+
+		}else if(pass[read_p_i] >= 201 && pass[read_p_i] <= 230
+				&& pass[read_p_i + 1] == 50
+				&& pass[read_p_i + 2] == 201
+				&& pass[read_p_i + 3] == 55
+				&& pass[read_p_i + 4] >= 1 && pass[read_p_i + 4] <= 30){	//斜め→左135°ターン
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			if(motion[motion_count]==200){
+				motion[motion_count]=0;
+			}
+			motion_count++;
+			motion[motion_count] = 165;
+			adjust_straight = -1;
+			read_p_i = read_p_i + 4;
+
+		}else if(pass[read_p_i] >= 201 && pass[read_p_i] <= 230
+				&& pass[read_p_i + 1] == 40
+				&& pass[read_p_i+2] >= 201 && pass[read_p_i+2] <= 230){	//斜め→右V90°ターン
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			if(motion[motion_count]==200){
+				motion[motion_count]=0;
+			}
+			motion_count++;
+			motion[motion_count] = 174;
+			adjust_straight = -1;	//0
+			read_p_i = read_p_i + 2;
+
+		}else if(pass[read_p_i] >= 201 && pass[read_p_i] <= 230
+				&& pass[read_p_i + 1] == 50
+				&& pass[read_p_i+2] >= 201 && pass[read_p_i+2] <= 230){	//斜め→左V90°ターン
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			if(motion[motion_count]==200){
+				motion[motion_count]=0;
+			}
+			motion_count++;
+			motion[motion_count] = 175;
+			adjust_straight = -1;	//0
+			read_p_i = read_p_i + 2;
+
+		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30
+				&& pass[read_p_i + 1] == 45
+				&& pass[read_p_i + 2] >= 201 && pass[read_p_i + 2] <= 230){//右の45degターン→斜め
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			motion_count++;
+			motion[motion_count] = 134;
+			adjust_straight = -1;	//0
+			read_p_i = read_p_i + 2;
+
+		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30
+				&& pass[read_p_i + 1] == 55
+				&& pass[read_p_i + 2] >= 201 && pass[read_p_i + 2] <= 230){	//左の45degターン→斜め
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			motion_count++;
+			motion[motion_count] = 135;
+			adjust_straight = -1;	//0
+			read_p_i = read_p_i + 2;
+
+		}else if(pass[read_p_i] >= 201 && pass[read_p_i] <= 230
+				&& pass[read_p_i + 1] == 45
+				&& pass[read_p_i + 2] >= 1 && pass[read_p_i + 2] <= 30){	//斜め→右45°ターン
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			if(motion[motion_count]==200){
+				motion[motion_count]=0;
+			}
+			motion_count++;
+			motion[motion_count] = 154;
+			adjust_straight = -1;
+			read_p_i = read_p_i + 2;
+
+		}else if(pass[read_p_i] >= 201 && pass[read_p_i] <= 230
+				&& pass[read_p_i + 1] == 55
+				&& pass[read_p_i + 2] >= 1 && pass[read_p_i + 2] <= 30){	//斜め→左45°ターン
+			motion[motion_count] = pass[read_p_i] - 1 + adjust_straight;
+			if(motion[motion_count]==200){
+				motion[motion_count]=0;
+			}
+			motion_count++;
+			motion[motion_count] = 155;
+			adjust_straight = -1;
+			read_p_i = read_p_i + 2;
+
+		}else if(pass[read_p_i] >= 201 && pass[read_p_i] <= 230){	//斜め直進
+			motion[motion_count] = pass[read_p_i] + adjust_straight;
+			read_p_i = read_p_i + 1;
+
+		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30){		//直進
+			motion[motion_count] = pass[read_p_i] + adjust_straight;
+			read_p_i = read_p_i + 1;
+
+		}else {
+			read_p_i++;
+		}
+		if (read_p_i - 1 >= last_p_i) {
+			break;
+		}
+		motion_count++;	//動作のカウント（斜め直線ではカウントアップしない）
+	}
+	last_p_i = read_p_i - 1;	//変換後のpass[]を最後の値とする
+}
+
 void convert_pass_skew() {
 	volatile int read_p_i, motion_count, adjust_straight, thin = 0, s_count, j=0;
 	read_p_i = 0;
@@ -2941,7 +3517,7 @@ void exe_kamawari_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_m
 	}
 	//以下、最初の動作のみ別枠で行う。
 	if (pass[read_p_i] == 255) {	//斜め無し・開幕ターン無し  学生大会で直した
-		daikei_for_pass_kai(90.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
+		daikei_for_pass_kai(90.0 + 47.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
 	}
 	//以下、最初以外の動作
 	while (1) {
@@ -3125,38 +3701,35 @@ void exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 
 	assign_parameters(hikisuu_mode);	//走行モードの決定
 
-	//以下、最初の動作のみ別枠で行う。
+	//以下、最初の動作のみ別枠で行う。(尻当てによりスタート！)
 	if (motion[read_P_I] >= 1 && motion[read_P_I] <= 30) {
-		daikei_for_pass_EX(90.0 * motion[read_P_I], vel_high, hikisuu_accel, 0.0,
+		daikei_for_pass_EX(90.0 * motion[read_P_I] + 47.0, vel_high, hikisuu_accel, 0.0,
 				vel_high, 1, 0);
 	} else if (motion[read_P_I] == 74) {	//開幕右小回り→1区間加速
-		daikei_for_pass_EX(90.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);
+		daikei_for_pass_EX(90.0 + 47.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);
 		slalom_2(90.0, 22.5, 67.5, 1000.0, 5500, -1.0, 500.0, 13.0, 0.0);//右小回り(後距離0)  ????
 		daikei_for_pass_EX(90.0, vel_high, accel_normal, vel_low, vel_high, 1,
 				0);	//加速
 	} else if (motion[read_P_I] == 84) {	//開幕右45°ターン→斜め(初期速度は0.0)
-		daikei_for_pass_EX(turn[cc].P_1_3.d_f, turn[cc].P_1_3.vel, accel_normal, 0.0, turn[cc].P_1_3.vel, 0, 0);
+		daikei_for_pass_EX(turn[cc].P_1_3.d_f + 47.0, turn[cc].P_1_3.vel, accel_normal, 0.0, turn[cc].P_1_3.vel, 0, 0);
 		turn_for_skew_pass(turn[cc].P_1_3.theta, turn[cc].P_1_3.th1,
 				turn[cc].P_1_3.th2, 1000.0, turn[cc].P_1_3.a_cc,
-				turn[cc].P_1_3.wise, 0.0,
+				turn[cc].P_1_3.wise, turn[cc].P_1_3.vel,
 				turn[cc].P_1_3.vel, turn[cc].P_1_3.vel,
-				0.0,
-				turn[cc].P_1_3.d_r);	//右45°ターン→斜め
+				0.0, turn[cc].P_1_3.d_r);	//右45°ターン→斜め
 
 	} else if (motion[read_P_I] == 94) {	//開幕右135°ターン→斜め(初期速度は0.0)
-		daikei_for_pass_EX(turn[cc].P_1_4.d_f , turn[cc].P_1_4.vel, accel_normal, 0.0, turn[cc].P_1_4.vel, 0, 0);
+		daikei_for_pass_EX(turn[cc].P_1_4.d_f + 47.0 , turn[cc].P_1_4.vel, accel_normal, 0.0, turn[cc].P_1_4.vel, 0, 0);
 		turn_for_skew_pass(turn[cc].P_1_4.theta, turn[cc].P_1_4.th1,
 				turn[cc].P_1_4.th2, 1000.0, turn[cc].P_1_4.a_cc,
 				turn[cc].P_1_4.wise, turn[cc].P_1_4.vel,
 				turn[cc].P_1_4.vel, turn[cc].P_1_4.vel,
-				 0.0,
-				turn[cc].P_1_4.d_r);	//右135°ターン→斜め
+				 0.0, turn[cc].P_1_4.d_r);	//右135°ターン→斜め
 
 	} else if (motion[read_P_I] == 253) {	//斜め無し・開幕ターンあり  学生大会で直した
-		daikei_for_pass_EX(90.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);//緩やかに加速する
-
+		daikei_for_pass_EX(90.0 + 47.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);//緩やかに加速する
 	} else if (motion[read_P_I] == 255) {	//斜め無し・開幕ターン無し  学生大会で直した
-		daikei_for_pass_EX(90.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
+		daikei_for_pass_EX(90.0 + 47.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
 
 	}
 	//以下、最初以外の動作
@@ -3166,9 +3739,9 @@ void exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 			break;	//daikeiの関数を抜けられる
 		}
 		read_P_I++;
-		if(read_P_I==5){		//debug
-			sample_flag=1;		//debug
-		}						//debug
+//		if(read_P_I==1){		//debug
+//			sample_flag=1;		//debug
+//		}						//debug
 
 		if ((motion[read_P_I + 1] == 114) || (motion[read_P_I + 1] == 124)
 				|| (motion[read_P_I + 1] == 134)
@@ -3187,13 +3760,15 @@ void exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 			flags_kabekire.wait=1;
 		} else {
 			flags_kabekire.wait = 0;	//壁切れyomanai
+			flags_kabekire.next_r=0;
+			flags_kabekire.next_l=0;
 		}
 		if (motion[read_P_I] <= 30 && motion[read_P_I] >= 1) {	//数値の区間の半分直進
 			daikei_for_pass_EX(90.0 * motion[read_P_I], hikisuu_vmax,
 					hikisuu_accel, vel_high, vel_high, 1, 1);
 		}else if(motion[read_P_I] <= 230 && motion[read_P_I] >= 200){
-			daikei_for_pass_EX(127.3 * (motion[read_P_I] - 200), vel_high,
-					hikisuu_accel, vel_high, vel_high, 0, 0);
+			daikei_for_pass_EX(127.3 * (motion[read_P_I] - 200.0), vel_high,
+					hikisuu_accel, 650.0, 650.0, 0, 0);
 		}
 		else {
 
@@ -3289,7 +3864,7 @@ void exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 
 				break;
 			case 155:	//斜め→左45°ターン
-				turn_for_skew_pass(turn[cc].P_1_6.theta, turn[cc].P_1_6.th1,
+				turn_for_skew_pass(turn[cc].P_1_13.theta, turn[cc].P_1_13.th1,
 						turn[cc].P_1_13.th2, 1000.0, turn[cc].P_1_13.a_cc,
 						turn[cc].P_1_13.wise, turn[cc].P_1_13.vel,
 						turn[cc].P_1_13.vel, turn[bb].P_1_13.vel,
@@ -3475,46 +4050,42 @@ void exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 }
 
 
-void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
-	volatile int read_p_i;
-	read_p_i = 0;
+void temp_exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
+//	volatile int read_P_I;
+	read_P_I = 0;
 
 	assign_parameters(hikisuu_mode);	//走行モードの決定
 
-	//以下、最初の動作のみ別枠で行う。
-	if (motion[read_p_i] >= 1 && motion[read_p_i] <= 30) {
-		daikei_for_pass_kai(90.0 * motion[read_p_i], vel_high, hikisuu_accel, 0.0,
+	//以下、最初の動作のみ別枠で行う。(尻当てによりスタート！)
+	if (motion[read_P_I] >= 1 && motion[read_P_I] <= 30) {
+		daikei_for_pass_EX(90.0 * motion[read_P_I] + 47.0, vel_high, hikisuu_accel, 0.0,
 				vel_high, 1, 0);
-	} else if (motion[read_p_i] == 74) {	//開幕右小回り→1区間加速
-		daikei_for_pass_kai(90.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);
+	} else if (motion[read_P_I] == 74) {	//開幕右小回り→1区間加速
+		daikei_for_pass_EX(90.0 + 47.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);
 		slalom_2(90.0, 22.5, 67.5, 1000.0, 5500, -1.0, 500.0, 13.0, 0.0);//右小回り(後距離0)  ????
-		daikei_for_pass_kai(90.0, vel_high, accel_normal, vel_low, vel_high, 1,
+		daikei_for_pass_EX(90.0, vel_high, accel_normal, vel_low, vel_high, 1,
 				0);	//加速
-	} else if (motion[read_p_i] == 84) {	//開幕右45°ターン→斜め
-		daikei_for_pass_kai(90.0, turn[cc].P_1_3.vel, accel_normal, 0.0, turn[cc].P_1_3.vel, 1, 0);
+	} else if (motion[read_P_I] == 84) {	//開幕右45°ターン→斜め(初期速度は0.0)
+		daikei_for_pass_EX(turn[cc].P_1_3.d_f + 47.0, turn[cc].P_1_3.vel, accel_normal, 0.0, turn[cc].P_1_3.vel, 0, 0);
 		turn_for_skew_pass(turn[cc].P_1_3.theta, turn[cc].P_1_3.th1,
 				turn[cc].P_1_3.th2, 1000.0, turn[cc].P_1_3.a_cc,
-				turn[cc].P_1_3.wise, turn[bb].P_1_3.vel,
+				turn[cc].P_1_3.wise, turn[cc].P_1_3.vel,
 				turn[cc].P_1_3.vel, turn[cc].P_1_3.vel,
-				turn[cc].P_1_3.d_f + adjust_before_dist,
-				turn[cc].P_1_3.d_r);	//右45°ターン→斜め
+				0.0, turn[cc].P_1_3.d_r);	//右45°ターン→斜め
 
-	} else if (motion[read_p_i] == 94) {	//開幕右135°ターン→斜め
-		daikei_for_pass_kai(90.0, turn[cc].P_1_4.vel, accel_normal, 0.0, turn[cc].P_1_4.vel, 1, 0);
+	} else if (motion[read_P_I] == 94) {	//開幕右135°ターン→斜め(初期速度は0.0)
+		daikei_for_pass_EX(turn[cc].P_1_4.d_f + 47.0 , turn[cc].P_1_4.vel, accel_normal, 0.0, turn[cc].P_1_4.vel, 0, 0);
 		turn_for_skew_pass(turn[cc].P_1_4.theta, turn[cc].P_1_4.th1,
 				turn[cc].P_1_4.th2, 1000.0, turn[cc].P_1_4.a_cc,
-				turn[cc].P_1_4.wise, turn[bb].P_1_4.vel,
+				turn[cc].P_1_4.wise, turn[cc].P_1_4.vel,
 				turn[cc].P_1_4.vel, turn[cc].P_1_4.vel,
-				turn[cc].P_1_4.d_f + adjust_before_dist,
-				turn[cc].P_1_4.d_r);	//右135°ターン→斜め
+				 0.0, turn[cc].P_1_4.d_r);	//右135°ターン→斜め
 
-	} else if (motion[read_p_i] == 253) {	//斜め無し・開幕ターンあり  学生大会で直した
-		daikei_for_pass_kai(90.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);//緩やかに加速する
+	} else if (motion[read_P_I] == 253) {	//斜め無し・開幕ターンあり  学生大会で直した
+		daikei_for_pass_EX(90.0 + 47.0, vel_low, accel_normal, 0.0, vel_low, 1, 0);//緩やかに加速する
+	} else if (motion[read_P_I] == 255) {	//斜め無し・開幕ターン無し  学生大会で直した
+		daikei_for_pass_EX(90.0 + 47.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
 
-	} else if (motion[read_p_i] == 255) {	//斜め無し・開幕ターン無し  学生大会で直した
-		daikei_for_pass_kai(90.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
-
-	} else {
 	}
 	//以下、最初以外の動作
 	while (1) {
@@ -3522,50 +4093,41 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 			GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			break;	//daikeiの関数を抜けられる
 		}
+		read_P_I++;
+//		if(read_P_I==1){		//debug
+//			sample_flag=1;		//debug
+//		}						//debug
 
-		read_p_i++;
-		if (motion[read_p_i + 1] == 114) {	//次が大回りとUターンの場合
-			wait_kabekire = 1;	//壁切れを読むまで待つ(なぜか90区間直進ではフラグが立たない20171001)
-		}
-		else if (motion[read_p_i + 1] == 115) {	//次が大回りとUターンの場合
-			wait_kabekire = 1;	//壁切れを読むまで待つ(なぜか90区間直進ではフラグが立たない20171001)
-		}
-		else if (motion[read_p_i + 1] == 124) {	//次が大回りとUターンの場合
-			wait_kabekire = 1;	//壁切れを読むまで待つ(なぜか90区間直進ではフラグが立たない20171001)
-
-		}
-		else if (motion[read_p_i + 1] == 125) {	//次が大回りとUターンの場合
-			wait_kabekire = 1;	//壁切れを読むまで待つ(なぜか90区間直進ではフラグが立たない20171001)
-		}
-/*		if ((motion[read_p_i + 1] == 114) || (motion[read_p_i + 1] == 124)
-				|| (motion[read_p_i + 1] == 134)
-				|| (motion[read_p_i + 1] == 144)
-				|| motion[read_p_i + 1] == 184) {	//壁切れを読み、次が右ターンの場合
+		if ((motion[read_P_I + 1] == 114) || (motion[read_P_I + 1] == 124)
+				|| (motion[read_P_I + 1] == 134)
+				|| (motion[read_P_I + 1] == 144)
+				|| motion[read_P_I + 1] == 184) {	//壁切れを読み、次が右ターンの場合
 			flags_kabekire.next_r=1;
 			flags_kabekire.next_l=0;
 			flags_kabekire.wait=1;
-		} else if ((motion[read_p_i + 1] == 115)
-				|| (motion[read_p_i + 1] == 125)
-				|| (motion[read_p_i + 1] == 135)
-				|| (motion[read_p_i + 1] == 145)
-				|| motion[read_p_i + 1] == 185) {	//壁切れを読み、次が左ターンの場合
+		} else if ((motion[read_P_I + 1] == 115)
+				|| (motion[read_P_I + 1] == 125)
+				|| (motion[read_P_I + 1] == 135)
+				|| (motion[read_P_I + 1] == 145)
+				|| motion[read_P_I + 1] == 185) {	//壁切れを読み、次が左ターンの場合
 			flags_kabekire.next_r=0;
 			flags_kabekire.next_l=1;
 			flags_kabekire.wait=1;
-
-		}*/ else {
-			wait_kabekire = 0;	//壁切れyomanai
+		} else {
+			flags_kabekire.wait = 0;	//壁切れyomanai
+			flags_kabekire.next_r=0;
+			flags_kabekire.next_l=0;
 		}
-		if (motion[read_p_i] <= 30 && motion[read_p_i] >= 1) {	//数値の区間の半分直進
-			daikei_for_pass_kai2(90.0 * motion[read_p_i], hikisuu_vmax,
+		if (motion[read_P_I] <= 30 && motion[read_P_I] >= 1) {	//数値の区間の半分直進
+			daikei_for_pass_EX(90.0 * motion[read_P_I], hikisuu_vmax,
 					hikisuu_accel, vel_high, vel_high, 1, 1);
-		}else if(motion[read_p_i] <= 230 && motion[read_p_i] >= 200){
-			daikei_for_pass_kai2(127.3 * (motion[read_p_i] - 200), vel_high,
-					hikisuu_accel, vel_high, vel_high, 0, 0);
+		}else if(motion[read_P_I] <= 230 && motion[read_P_I] >= 200){
+			daikei_for_pass_EX(127.3 * (motion[read_P_I] - 200.0), 1200.0,
+					hikisuu_accel, 650.0, 650.0, 0, 0);
 		}
 		else {
 
-			switch ((char) motion[read_p_i]) {
+			switch ((char) motion[read_P_I]) {
 			/*			case 255:	//最初の90直進(斜め無しpass用で、開幕直進の場合)
 			 daikei_for_pass_kai(90.0, vel_high, hikisuu_accel, 0.0,
 			 vel_high, 1, 0);	//後のパスに繋げるために区間距離は短くした
@@ -3654,9 +4216,10 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[cc].P_1_5.vel, turn[bb].P_1_5.vel,
 						turn[cc].P_1_5.d_f + adjust_before_dist,
 						turn[cc].P_1_5.d_r);	//斜め→右45度ターン
+
 				break;
 			case 155:	//斜め→左45°ターン
-				turn_for_skew_pass(turn[cc].P_1_6.theta, turn[cc].P_1_6.th1,
+				turn_for_skew_pass(turn[cc].P_1_13.theta, turn[cc].P_1_13.th1,
 						turn[cc].P_1_13.th2, 1000.0, turn[cc].P_1_13.a_cc,
 						turn[cc].P_1_13.wise, turn[cc].P_1_13.vel,
 						turn[cc].P_1_13.vel, turn[bb].P_1_13.vel,
@@ -3696,7 +4259,7 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[cc].P_1_15.d_r);	//斜め→左V90度ターン
 				break;
 			case 184:	//減速+右ターン
-				daikei_for_pass_kai2(90.0, vel_high, hikisuu_accel,
+				daikei_for_pass_EX(90.0, vel_high, hikisuu_accel,
 						vel_high, vel_low, 1, 1);	//(壁切れyomu)
 				slalom_2(turn[aa].P_1_0.theta, turn[aa].P_1_0.th1,
 						turn[aa].P_1_0.th2, 1000.0, turn[aa].P_1_0.a_cc,
@@ -3704,7 +4267,7 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[aa].P_1_0.d_f, turn[aa].P_1_0.d_r);	//右小回り
 				break;
 			case 185:	//減速+左ターン
-				daikei_for_pass_kai2(90.0, vel_high, hikisuu_accel,
+				daikei_for_pass_EX(90.0, vel_high, hikisuu_accel,
 						vel_high, vel_low, 1, 1);	//(壁切れをyomu)
 				slalom_2(turn[aa].P_1_8.theta, turn[aa].P_1_8.th1,
 						turn[aa].P_1_8.th2, 1000.0, turn[aa].P_1_8.a_cc,
@@ -3716,16 +4279,16 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[aa].P_1_0.th2, 1000.0, turn[aa].P_1_0.a_cc,
 						turn[aa].P_1_0.wise, turn[aa].P_1_0.vel,
 						turn[aa].P_1_0.d_f, turn[aa].P_1_0.d_r);	//右小回り
-				daikei_for_pass_kai2(90.0, vel_high, hikisuu_accel, vel_low,
+				daikei_for_pass_EX(90.0, vel_high, hikisuu_accel, vel_low,
 						vel_high, 1, 1);
 				break;
 			case 195:	//左ターン+加速
-				slalom_2(90.0, 22.5, 67.5, 1000.0, 5500.0, 1.0, 500.0,
-						5.0, 21.0);	//左小回り
 				slalom_2(turn[aa].P_1_8.theta, turn[aa].P_1_8.th1,
 						turn[aa].P_1_8.th2, 1000.0, turn[aa].P_1_8.a_cc,
 						turn[aa].P_1_8.wise, turn[aa].P_1_8.vel,
 						turn[aa].P_1_8.d_f, turn[aa].P_1_8.d_r);	//左小回り
+				daikei_for_pass_EX(90.0, vel_high, hikisuu_accel, vel_low,
+						vel_high, 1, 1);
 				break;
 			case 232:	//右大廻ターン+停止
 				turn_for_pass(turn[bb].P_1_1.theta, turn[bb].P_1_1.th1,
@@ -3733,7 +4296,7 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[bb].P_1_1.wise, turn[bb].P_1_1.vel,
 						turn[bb].P_1_1.d_f + adjust_before_dist,
 						turn[bb].P_1_1.d_r);	//右大廻ターン
-				daikei_for_pass_kai2(90.0, turn[bb].P_1_1.vel, accel_normal, turn[bb].P_1_1.vel,
+				daikei_for_pass_EX(90.0, turn[bb].P_1_1.vel, accel_normal, turn[bb].P_1_1.vel,
 						0.0, 1, 0);
 
 				break;
@@ -3743,7 +4306,7 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[bb].P_1_9.wise, turn[bb].P_1_9.vel,
 						turn[bb].P_1_9.d_f + adjust_before_dist,
 						turn[bb].P_1_9.d_r);	//左大廻ターン
-				daikei_for_pass_kai2(90.0, turn[bb].P_1_9.vel, accel_normal, turn[bb].P_1_9.vel,
+				daikei_for_pass_EX(90.0, turn[bb].P_1_9.vel, accel_normal, turn[bb].P_1_9.vel,
 						0.0, 1, 0);
 
 				break;
@@ -3753,7 +4316,7 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[bb].P_1_2.wise, turn[bb].P_1_2.vel,
 						turn[bb].P_1_2.d_f + adjust_before_dist,
 						turn[bb].P_1_2.d_r);	//右Uターン
-				daikei_for_pass_kai2(90.0, turn[bb].P_1_2.vel, accel_normal, turn[bb].P_1_2.vel,
+				daikei_for_pass_EX(90.0, turn[bb].P_1_2.vel, accel_normal, turn[bb].P_1_2.vel,
 						0.0, 1, 0);
 
 				break;
@@ -3763,7 +4326,7 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[bb].P_1_10.wise, turn[bb].P_1_10.vel,
 						turn[bb].P_1_10.d_f + adjust_before_dist,
 						turn[bb].P_1_10.d_r);	//右Uターン
-				daikei_for_pass_kai2(90.0, turn[bb].P_1_10.vel, accel_normal, turn[bb].P_1_10.vel,
+				daikei_for_pass_EX(90.0, turn[bb].P_1_10.vel, accel_normal, turn[bb].P_1_10.vel,
 						0.0, 1, 0);
 
 				break;
@@ -3774,18 +4337,18 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[cc].P_1_5.vel, turn[bb].P_1_5.vel,
 						turn[cc].P_1_5.d_f + adjust_before_dist,
 						turn[cc].P_1_5.d_r);	//斜め→右45度ターン
-				daikei_for_pass_kai2(90.0, turn[cc].P_1_5.vel, accel_normal, turn[cc].P_1_5.vel,
+				daikei_for_pass_EX(90.0, turn[cc].P_1_5.vel, accel_normal, turn[cc].P_1_5.vel,
 						0.0, 1, 0);
 
 				break;
 			case 237:	//斜め→左45°ターン+停止
-				turn_for_skew_pass(turn[cc].P_1_6.theta, turn[cc].P_1_6.th1,
+				turn_for_skew_pass(turn[cc].P_1_13.theta, turn[cc].P_1_13.th1,
 						turn[cc].P_1_13.th2, 1000.0, turn[cc].P_1_13.a_cc,
 						turn[cc].P_1_13.wise, turn[cc].P_1_13.vel,
 						turn[cc].P_1_13.vel, turn[bb].P_1_13.vel,
 						turn[cc].P_1_13.d_f + adjust_before_dist,
 						turn[cc].P_1_13.d_r);	//斜め→左45度ターン
-				daikei_for_pass_kai2(90.0, turn[cc].P_1_13.vel, accel_normal, turn[cc].P_1_13.vel,
+				daikei_for_pass_EX(90.0, turn[cc].P_1_13.vel, accel_normal, turn[cc].P_1_13.vel,
 						0.0, 1, 0);
 
 				break;
@@ -3796,7 +4359,7 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[cc].P_1_6.vel, turn[bb].P_1_6.vel,
 						turn[cc].P_1_6.d_f + adjust_before_dist,
 						turn[cc].P_1_6.d_r);	//斜め→右135度ターン
-				daikei_for_pass_kai2(90.0, turn[cc].P_1_6.vel, accel_normal, turn[cc].P_1_6.vel,
+				daikei_for_pass_EX(90.0, turn[cc].P_1_6.vel, accel_normal, turn[cc].P_1_6.vel,
 						0.0, 1, 0);
 
 				break;
@@ -3807,40 +4370,32 @@ void exe_pass_test(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {
 						turn[cc].P_1_14.vel, turn[bb].P_1_14.vel,
 						turn[cc].P_1_14.d_f + adjust_before_dist,
 						turn[cc].P_1_14.d_r);	//斜め→左135度ターン
-				daikei_for_pass_kai2(90.0, turn[cc].P_1_14.vel, accel_normal, turn[cc].P_1_14.vel,
+				daikei_for_pass_EX(90.0, turn[cc].P_1_14.vel, accel_normal, turn[cc].P_1_14.vel,
 						0.0, 1, 0);
 
 				break;
 			case 240:   //停止(90区間で最大限減速する)
-				daikei_for_pass_kai2(90.0, vel_high, accel_normal, vel_high,
+				daikei_for_pass_EX(90.0, vel_high, accel_normal, vel_high,
 						0.0, 1, 0);
 
 				break;
 			case 100:   //停止(90区間で)(斜め無しpass用)
-				daikei_for_pass_kai2(90.0, vel_high, accel_normal, vel_high,
+				daikei_for_pass_EX(90.0, vel_high, accel_normal, vel_high,
 						0.0, 1, 0);
 //				myprintf("test100\r\n");
 				break;
 			case 103:   //停止(90区間で)(斜め無しpass用)
-				daikei_for_pass_kai2(90.0, vel_low, accel_normal, vel_low, 0.0,
+				daikei_for_pass_EX(90.0, vel_low, accel_normal, vel_low, 0.0,
 						1, 0);
 				break;
 			}
 		}
-		if (read_p_i == last_p_i) {
+		if (read_P_I == last_p_i) {
 
 			break;
 		}
 	}
-//	if (motion[last_p_i] == 154 || motion[last_p_i] == 155
-//			|| motion[last_p_i] == 164 || motion[last_p_i] == 165) {
-//		daikei_for_pass_kai(90.0, 500.0, hikisuu_accel, 500.0, 0.0, 1, 0);//低速からの直進90
-//	} else if (motion[last_p_i] == 184 || motion[last_p_i] == 185) {
-//		daikei_for_pass_kai(90.0, 500.0, hikisuu_accel, 500.0, 0.0, 1, 0);//低速からの直進90
-//	} else {
-//		daikei_for_pass_kai(90.0, vel_high, hikisuu_accel, vel_high, 0.0, 1,
-//				0);	//高速からの90直進
-//	}
+
 	wall_control = 0;	//ゴールで誤動作しないようにするため
 	ideal_omega = 0.0;	//ゴールで誤動作しないようにするため
 	ideal_balance_velocity = 0.0;
@@ -4372,21 +4927,26 @@ void initialize(){
 	init_RSPI();
 	refer_flag = 0;
 	refer_count = 0;
-
+	K_center.p=0.0;
+	K_center.i=0.0;
+	K_center.d=0.0;
+	K_rot.p=0.0;
+	K_rot.i=0.0;
+	K_rot.d=0.0;
 }
 
 void get_log(int log_number){
-	Log1[log_number] = ideal_angacc;
-	Log2[log_number] = ideal_omega;
-	Log3[log_number] = omega;
-	Log4[log_number] = angle;
-	Log5[log_number] = ideal_balance_velocity;
-	Log6[log_number] = balance_velocity;
-	Log7[log_number] = ideal_balance_distance;
-	Log8[log_number] = Error;
-	Log9[log_number] = diff_average_sensor.right;
-	Log10[log_number] = balance_distance;
-	Log11[log_number] = motion[read_P_I];
+	Log1[log_number] = (float)ideal_omega;
+	Log2[log_number] = (float)omega;
+	Log3[log_number] = (float)ideal_balance_velocity;
+	Log4[log_number] = (float)Error;
+	Log5[log_number] = (float)dutty.left;
+	Log6[log_number] = (float)dutty.right;
+	Log7[log_number] = (float)reference_omega;
+	Log8[log_number] = (float)gyro_z.SUM;
+	Log9[log_number] = (float)gptcount_l;
+	Log10[log_number] = (float)gptcount_r;
+	Log11[log_number] = (float)GPT.GTSTR.BIT.CST0;
 }
 
 void interrupt_CMT0() {
@@ -4408,8 +4968,8 @@ void interrupt_CMT0() {
 			log_count++;
 			sample_count=0;
 			if(log_count==LOG_NUMBER){
-				sample_flag=0;
-				log_count++;
+				sample_flag = 0;
+				log_count = 0;
 			}
 		}
 //		sample1[sample_count] = Erorr_center.i;
@@ -4459,6 +5019,8 @@ void interrupt_CMT0() {
 			Erorr_center.i = 0.0;
 			Erorr_rot.i = 0.0;
 			reference_fin = 1;
+			refer_count = 0;
+			refer_flag = 0;
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 				LED_V1 = 1;
@@ -4521,11 +5083,11 @@ void interrupt_CMT0() {
 	} else {
 		Error_wall.i = 0.0;
 	}
+	if(flags_kabekire.enable1==1){		//flags_kabekire.enable1:pass壁切れを読むために必要
+		kabekire_for_pass();
+	}
 	if (wall_control == 1) {	//壁制御ON
 		test_wall_control();	//壁制御（added in 20170923）
-		if(flags_kabekire.enable1==1){		//flags_kabekire.enable1:pass壁切れを読むために必要
-			kabekire_for_pass();
-		}
 
 		//以下、7x5=35ms前の状態を判定する
 		if (reverse_flag == 1) {	//袋小路での壁切れは中央でなくても確実に読めるようにする
@@ -4623,14 +5185,6 @@ void interrupt_CMT0() {
 	}
 
 //以下、重心を用いらた並進運動と回転運動の重ね合わせ
-	/*	dutty.right = dutty_foward.right + K_center.p * diff_balance_velocity[0]
-	 + K_center.d * (Erorr_center.d) + K_center.i * (Erorr_center.i)
-	 + EP_keisuu * K_rot.p * diff_omega[0] + K_rot.d * (Erorr_rot.d)
-	 + EI_keisuu * K_rot.i * (Erorr_rot.i) - Error * Kp_wall_r;
-	 dutty.left = dutty_foward.left + K_center.p * diff_balance_velocity[0]
-	 + K_center.d * (Erorr_center.d) + K_center.i * (Erorr_center.i)
-	 - (EP_keisuu * K_rot.p * diff_omega[0] + K_rot.d * (Erorr_rot.d)
-	 + EI_keisuu * K_rot.i * (Erorr_rot.i)) + Error * Kp_wall_l;*///20170921現在まで使用
 	dutty.right = dutty_foward.right + K_center.p * Erorr_center.p//壁制御値を角速度に代入したもの
 	+ K_center.d * (Erorr_center.d) + K_center.i * (Erorr_center.i)
 			+ K_rot.p * (Erorr_rot.p) + K_rot.d * (Erorr_rot.d)
@@ -4707,64 +5261,48 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 		//以下、ターン調整-第2層
 		switch (second_number) {
 		case 1:
-			aaa=1;
-			sample_flag = 0;
-			r_before = 40.0;
-			r_after = 45.0;
-			vel = 650.0;
-			test_daikei(127.3 * 1.0, vel, 5000.0, 0.0, vel, 0);
-			slalom_2(turn[aaa].P_1_0.theta, turn[aaa].P_1_0.th1,
-					turn[aaa].P_1_0.th2, 1000.0, turn[aaa].P_1_0.a_cc,
-					turn[aaa].P_1_0.wise, turn[aaa].P_1_0.vel,
-					r_before, r_after);	//小回り右スラローム
-			test_daikei(127.3 * 1.0, vel, 5000.0, vel, 0.0, 0);
-			wall_control = 0;
+			totalangle =45.0;
+			angle1 = 22.0;
+			angle2 = totalangle - angle1;
+			accel = 8387.0;
+			r_before = 42.0;
+			r_after = 60.0;
+			c_wise = -1.0;
+			vel = 800.0;
+			Erorr_rot.i = 0.0;
+			test_daikei(180.0, vel, 5000, 0, vel, 0);
+			slalom_for_tuning(totalangle, angle1, angle2, 2000.0, accel, c_wise, vel, r_before,
+					r_after);		//保存パラメタ
+			test_daikei(127.3, vel, 6000, vel, 0, 0);
 			ideal_balance_velocity = 0.0;
+			LED_V1 = 0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			wall_control = 0;
 			sensor_enable = 0;
 
 			break;
 		case 2:
-			bb=1;
-			cc=1;
-			vel = 650.0;
-			test_daikei(127.3 * 1.0, vel, 6000.0, 0.0, vel, 0);
-
-			turn_for_skew_pass(turn[cc].P_1_7.theta, turn[cc].P_1_7.th1,
-					turn[cc].P_1_7.th2, 1000.0, turn[cc].P_1_7.a_cc,
-					turn[cc].P_1_7.wise, turn[cc].P_1_7.vel,
-					turn[cc].P_1_7.vel, turn[cc].P_1_7.vel,
-					turn[cc].P_1_7.d_f + adjust_before_dist,
-					turn[cc].P_1_7.d_r);	//斜め→右V90度ターン
-			test_daikei(127.3 * 1.0, vel, 6000.0, vel, 0.0, 0);
-			wall_control = 0;
+			totalangle =45.0;
+			angle1 = 22.0;
+			angle2 = totalangle - angle1;
+			accel = 8387.0;
+			r_before = 40.0;
+			r_after = 60.0;
+			c_wise = -1.0;
+			vel = 800.0;
+			Erorr_rot.i = 0.0;
+			test_daikei(180.0, vel, 5000, 0, vel, 0);
+			slalom_for_tuning(totalangle, angle1, angle2, 2000.0, accel, c_wise, vel, r_before,
+					r_after);		//保存パラメタ
+			test_daikei(127.3, vel, 6000, vel, 0, 0);
 			ideal_balance_velocity = 0.0;
+			LED_V1 = 0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			wall_control = 0;
 			sensor_enable = 0;
 
 			break;
 		case 3:
-			bb=1;
-			cc=1;
-			vel = 650.0;
-			test_daikei(127.3 * 1.0, vel, 6000.0, 0.0, vel, 0);
-			turn_for_skew_pass(turn[cc].P_1_15.theta, turn[cc].P_1_15.th1,
-					turn[cc].P_1_15.th2, 1000.0, turn[cc].P_1_15.a_cc,
-					turn[cc].P_1_15.wise, turn[cc].P_1_15.vel,
-					turn[cc].P_1_15.vel, turn[cc].P_1_15.vel,
-					turn[cc].P_1_15.d_f + 3.0 + adjust_before_dist,
-					turn[cc].P_1_15.d_r);	//斜め→左V90度ターン
-			test_daikei(127.3, vel, 6000.0, vel, 0.0, 0);
-			wall_control = 0;
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			wall_control = 0;
-			sensor_enable = 0;
 
 			break;
 		case 4:
@@ -4774,14 +5312,14 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 6:
-			totalangle =135.0;
-			angle1 = 29.0;
+			totalangle =45.0;
+			angle1 = 22.0;
 			angle2 = totalangle - angle1;
-			accel = 5840.0;
-			r_before = 80.0;
-			r_after = 75.0;
+			accel = 8395.0;
+			r_before = 10.0;
+			r_after = 10.0;
 			c_wise = -1.0;
-			vel = 650.0;
+			vel = 800.0;
 			Erorr_rot.i = 0.0;
 			test_daikei(180.0, vel, 5000, 0, vel, 0);
 			slalom_for_tuning(totalangle, angle1, angle2, 2000.0, accel, c_wise, vel, r_before,
@@ -4816,14 +5354,14 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 7:
-			totalangle =135.0;
-			angle1 = 28.0;
+			totalangle =45.0;
+			angle1 = 22.0;
 			angle2 = totalangle - angle1;
-			accel = 5950.0;
-			r_before = 80.0;
-			r_after = 75.0;
+			accel = 8383.0;
+			r_before = 10.0;
+			r_after = 10.0;
 			c_wise = -1.0;
-			vel = 650.0;
+			vel = 800.0;
 			Erorr_rot.i = 0.0;
 			test_daikei(180.0, vel, 5000, 0, vel, 0);
 			slalom_for_tuning(totalangle, angle1, angle2, 2000.0, accel, c_wise, vel, r_before,
@@ -4858,14 +5396,14 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 8:
-			totalangle =135.0;
-			angle1 = 27.0;
+			totalangle =45.0;
+			angle1 = 22.0;
 			angle2 = totalangle - angle1;
-			accel = 6050.0;
-			r_before = 80.0;
-			r_after = 75.0;
+			accel = 8387.0;
+			r_before = 10.0;
+			r_after = 10.0;
 			c_wise = -1.0;
-			vel = 650.0;
+			vel = 800.0;
 			Erorr_rot.i = 0.0;
 			test_daikei(180.0, vel, 5000, 0, vel, 0);
 			slalom_for_tuning(totalangle, angle1, angle2, 2000.0, accel, c_wise, vel, r_before,
@@ -4930,24 +5468,14 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 		//以下、ターン調整-第2層
 		switch (second_number) {
-		case 1://V90調整
-			bb=3;//800
-
-			flags_kabekire.wait=1;
-			flags_kabekire.next_l=0;
-			flags_kabekire.next_r=1;
-			vel = 800.0;
+		case 1://90調整
+			aa=1;//650.0
+			vel = 650.0;
 			test_daikei(90.0, vel, 5000, 0, vel, 0);
-			sample_flag=0;
-			daikei_for_pass_EX(90.0 * 2, vel, 6000.0, vel, vel, 1, 1);
-			flags_kabekire.wait=1;
-			flags_kabekire.next_l=0;
-			flags_kabekire.next_r=1;
-			turn_for_pass(turn[bb].P_1_1.theta, turn[bb].P_1_1.th1,
-					turn[bb].P_1_1.th2, 1000.0, turn[bb].P_1_1.a_cc,
-					turn[bb].P_1_1.wise, turn[bb].P_1_1.vel,
-					turn[bb].P_1_1.d_f + adjust_before_dist,
-					turn[bb].P_1_1.d_r);	//右大廻ターン
+			slalom_2(turn[aa].P_1_0.theta, turn[aa].P_1_0.th1,
+					turn[aa].P_1_0.th2, 1000.0, turn[aa].P_1_0.a_cc,
+					turn[aa].P_1_0.wise, turn[aa].P_1_0.vel,
+					turn[aa].P_1_0.d_f, turn[aa].P_1_0.d_r);	//右小回り
 			test_daikei(90.0, vel, 5000, vel, 0, 0);
 
 			ideal_balance_velocity = 0.0;
@@ -4958,15 +5486,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 2:
-			aaa=1;
-
-			wait_kabekire=0;
+			aa=1;//650.0
 			vel = 650.0;
 			test_daikei(90.0, vel, 5000, 0, vel, 0);
-			slalom_2(turn[aaa].P_1_9.theta, turn[aaa].P_1_9.th1,
-					turn[aaa].P_1_9.th2, 1000.0, turn[aaa].P_1_9.a_cc,
-					turn[aaa].P_1_9.wise, turn[aaa].P_1_9.vel,
-					turn[aaa].P_1_9.d_f+2.0, turn[aaa].P_1_9.d_r);	//小回り右スラローム
+			slalom_2(turn[aa].P_1_8.theta, turn[aa].P_1_8.th1,
+					turn[aa].P_1_8.th2, 1000.0, turn[aa].P_1_8.a_cc,
+					turn[aa].P_1_8.wise, turn[aa].P_1_8.vel,
+					turn[aa].P_1_8.d_f+4.0, turn[aa].P_1_8.d_r -2.0);	//右小回り
 			test_daikei(90.0, vel, 5000, vel, 0, 0);
 
 			ideal_balance_velocity = 0.0;
@@ -5096,157 +5622,6 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			sample_flag = 0;
 			COPPY_SAVEDMAZE_TO_TEMP();	//クラッシュ後でも使用できるように.
 			direction_count = 0;
-			adachihou_q(goal_x, goal_y, 0, 0, 500, 5000);
-			wall_control = 0;
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			if(fail_flag==0){
-				WALL_INFORMATION_save();
-				WATCHED_WALL_INFORMATION_save();
-			}
-			if (direction_count == 0) {
-				direction_count = 2;
-			} else if (direction_count == 1) {
-				direction_count = 3;
-			} else if (direction_count == 2) {
-				direction_count = 0;
-			} else {
-				direction_count = 1;
-			}
-			test_turn(180, 5000, 2500, -1.0, 0.0);//(float hikisuu_angle, float omega_max, float hikisuu_angacc,float unclock_wise, float hikisuu_balance_velocity)
-			wait(1000);
-			adachihou_q(0, 0, goal_x, goal_y, 500, 5000);
-			wall_control = 0;
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
-			LED4 = 0;
-			if(fail_flag==0){
-				WALL_INFORMATION_save();
-				WATCHED_WALL_INFORMATION_save();
-			}
-
-			break;
-		case 2:	//片道の足立法-第2層
-
-			sensor_enable = 1;
-			wait(500);
-			while (sen.right_side < 2500)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-
-			while (reference_fin == 0)
-				;
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-				fail_flag = 1;
-				LED_V1 = 1;
-				LED_V2 = 1;
-				LED_V3 = 1;
-				LED_V4 = 1;
-			}
-			EI_keisuu = 1.0;
-			sample_flag = 0;
-			direction_count = 0;
-			myprintf("row_temp[0]=%d", row_temp[0]);	//debug
-			myprintf("row_fix[0]=%d", row_fix[0]);	//debug
-			COPPY_SAVEDMAZE_TO_TEMP();	//クラッシュ後でも使用できるように.20171006
-			adachihou_q(goal_x, goal_y, 0, 0, 500, 2000);
-			wall_control = 0;
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			if(fail_flag==0){
-				WALL_INFORMATION_save();
-				WATCHED_WALL_INFORMATION_save();
-			}
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
-
-			break;
-		case 3:	//座標変換後の足立法-第2層
-
-			sensor_enable = 1;
-			wait(500);
-			while (sen.right_side < 2500)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-
-			while (reference_fin == 0)
-				;
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-				fail_flag = 1;
-				LED_V1 = 1;
-				LED_V2 = 1;
-				LED_V3 = 1;
-				LED_V4 = 1;
-			}
-			EI_keisuu = 1.0;
-			direction_count = 0;
-			adachihou2_q(goal_x, goal_y, 0, 0, 2);	//重心速度速いバージョン
-			wall_control = 0;
-			ideal_balance_velocity = 0.0;
-			wait(500);
-			if(fail_flag==0){
-				WALL_INFORMATION_save();
-				WATCHED_WALL_INFORMATION_save();
-			}
-			if (direction_count == 0) {
-				direction_count = 2;
-			} else if (direction_count == 1) {
-				direction_count = 3;
-			} else if (direction_count == 2) {
-				direction_count = 0;
-			} else {
-				direction_count = 1;
-			}
-			test_turn(180, 5000, 2500, -1.0, 0.0);//(float hikisuu_angle, float omega_max, float hikisuu_angacc,float unclock_wise, float hikisuu_balance_velocity)
-			wait(1000);
-			adachihou2_q( 0, 0, goal_x, goal_y, 2);	//重心速度速いバージョン
-			wall_control = 0;
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			if(fail_flag==0){
-				WALL_INFORMATION_save();
-				WATCHED_WALL_INFORMATION_save();
-			}
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
-
-			break;
-		case 4:
-			sensor_enable = 1;
-			wait(500);
-
-			while (sen.right_side < 2500)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-
-			while (reference_fin == 0)
-				;
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-				fail_flag = 1;
-				LED_V1 = 1;
-				LED_V2 = 1;
-				LED_V3 = 1;
-				LED_V4 = 1;
-			}
-			EI_keisuu = 1.0;
-			LED5 = 1;
-			sample_flag = 0;
-			COPPY_SAVEDMAZE_TO_TEMP();	//クラッシュ後でも使用できるように.
-			direction_count = 0;
 			adachihou2_q(goal_x, goal_y, 0, 0, 1);
 			wall_control = 0;
 			ideal_balance_velocity = 0.0;
@@ -5279,7 +5654,7 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			}
 
 			break;
-		case 5:
+		case 2:	//片道の足立法-第2層
 			sensor_enable = 1;
 			wait(500);
 			while (sen.right_side < 2500)
@@ -5290,6 +5665,8 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
@@ -5301,8 +5678,102 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			}
 			EI_keisuu = 1.0;
 			sample_flag = 0;
-			COPPY_SAVEDMAZE_TO_TEMP();	//クラッシュ後でも使用できるように.
 			direction_count = 0;
+			COPPY_SAVEDMAZE_TO_TEMP();	//クラッシュ後でも使用できるように.20171006
+			adachihou2_q(goal_x, goal_y, 0, 0, 1);
+			wall_control = 0;
+			ideal_balance_velocity = 0.0;
+			wait(1000);
+			if(fail_flag==0){
+				WALL_INFORMATION_save();
+				WATCHED_WALL_INFORMATION_save();
+			}
+			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
+			sensor_enable = 0;
+
+			break;
+		case 3:	//座標変換後の足立法-第2層
+
+			sensor_enable = 1;
+			wait(500);
+			while (sen.right_side < 2500)
+				;
+			wait(1000);
+			refer_flag = 1;	//リファレンス取得用フラグ
+			gyro_enable = 1;
+
+			while (reference_fin == 0)
+				;
+			reference_fin = 0;
+
+			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
+			if (reference_omega == 0.0) {
+				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
+				fail_flag = 1;
+				LED_V1 = 1;
+				LED_V2 = 1;
+				LED_V3 = 1;
+				LED_V4 = 1;
+			}
+			EI_keisuu = 1.0;
+			direction_count = 0;
+			adachihou2_q(goal_x, goal_y, 0, 0, 2);	//重心速度650
+			wall_control = 0;
+			ideal_balance_velocity = 0.0;
+			wait(500);
+			if(fail_flag==0){
+				WALL_INFORMATION_save();
+				WATCHED_WALL_INFORMATION_save();
+			}
+			if (direction_count == 0) {
+				direction_count = 2;
+			} else if (direction_count == 1) {
+				direction_count = 3;
+			} else if (direction_count == 2) {
+				direction_count = 0;
+			} else {
+				direction_count = 1;
+			}
+			test_turn(180, 5000, 2500, -1.0, 0.0);//(float hikisuu_angle, float omega_max, float hikisuu_angacc,float unclock_wise, float hikisuu_balance_velocity)
+			wait(1000);
+			adachihou2_q( 0, 0, goal_x, goal_y, 2);	//重心速度650
+			wall_control = 0;
+			ideal_balance_velocity = 0.0;
+			wait(1000);
+			if(fail_flag==0){
+				WALL_INFORMATION_save();
+				WATCHED_WALL_INFORMATION_save();
+			}
+			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
+			sensor_enable = 0;
+
+			break;
+		case 4:
+			sensor_enable = 1;
+			wait(500);
+			while (sen.right_side < 2500)
+				;
+			wait(1000);
+			refer_flag = 1;	//リファレンス取得用フラグ
+			gyro_enable = 1;
+
+			while (reference_fin == 0)
+				;
+			reference_fin = 0;
+
+			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
+			if (reference_omega == 0.0) {
+				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
+				fail_flag = 1;
+				LED_V1 = 1;
+				LED_V2 = 1;
+				LED_V3 = 1;
+				LED_V4 = 1;
+			}
+			EI_keisuu = 1.0;
+			sample_flag = 0;
+			direction_count = 0;
+			COPPY_SAVEDMAZE_TO_TEMP();	//クラッシュ後でも使用できるように.20171006
 			adachihou2_q(goal_x, goal_y, 0, 0, 2);	//重心速度速いバージョン
 			wall_control = 0;
 			ideal_balance_velocity = 0.0;
@@ -5315,10 +5786,92 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			sensor_enable = 0;
 
 			break;
+		case 5:
+			temp_goal_x = 15;
+			temp_goal_y = 15;
+
+			sensor_enable = 1;
+			wait(500);
+			while (sen.right_side < 2500)
+				;
+			wait(1000);
+			refer_flag = 1;	//リファレンス取得用フラグ
+			gyro_enable = 1;
+
+			while (reference_fin == 0)
+				;
+			reference_fin = 0;
+
+			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
+			if (reference_omega == 0.0) {
+				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
+				fail_flag = 1;
+				LED_V1 = 1;
+				LED_V2 = 1;
+				LED_V3 = 1;
+				LED_V4 = 1;
+			}
+			EI_keisuu = 1.0;
+			direction_count = 0;
+			adachihou2_q(goal_x, goal_y, 0, 0, 2);	//重心速度650
+			wall_control = 0;
+			ideal_balance_velocity = 0.0;
+			wait(500);
+			if(fail_flag==0){
+				WALL_INFORMATION_save();
+				WATCHED_WALL_INFORMATION_save();
+			}
+			if (direction_count == 0) {
+				direction_count = 2;
+			} else if (direction_count == 1) {
+				direction_count = 3;
+			} else if (direction_count == 2) {
+				direction_count = 0;
+			} else {
+				direction_count = 1;
+			}
+			test_turn(180, 5000, 2500, -1.0, 0.0);//(float hikisuu_angle, float omega_max, float hikisuu_angacc,float unclock_wise, float hikisuu_balance_velocity)
+			wait(1000);
+			adachihou2_q(temp_goal_x, temp_goal_y, goal_x, goal_y, 2);	//仮の値
+			wall_control = 0;
+			ideal_balance_velocity = 0.0;
+			wait(500);
+			if(fail_flag==0){
+				WALL_INFORMATION_save();
+				WATCHED_WALL_INFORMATION_save();
+			}
+			if (direction_count == 0) {
+				direction_count = 2;
+			} else if (direction_count == 1) {
+				direction_count = 3;
+			} else if (direction_count == 2) {
+				direction_count = 0;
+			} else {
+				direction_count = 1;
+			}
+			test_turn(180, 5000, 2500, -1.0, 0.0);//(float hikisuu_angle, float omega_max, float hikisuu_angacc,float unclock_wise, float hikisuu_balance_velocity)
+			wait(1000);
+			adachihou2_q(temp_goal_x, temp_goal_y, goal_x, goal_y, 2);	//仮の値
+			adachihou2_q( 0, 0, temp_goal_x, temp_goal_y, 2);	//重心速度650
+			wall_control = 0;
+			ideal_balance_velocity = 0.0;
+			wait(1000);
+			if(fail_flag==0){
+				WALL_INFORMATION_save();
+				WATCHED_WALL_INFORMATION_save();
+			}
+			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
+			sensor_enable = 0;
+
+
+			break;
 		case 6:
 
 			break;
 		case 7:
+			break;
+
+		case 8:
 			break;
 		}
 
@@ -5329,13 +5882,10 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 		case 1:	//斜め無しパスの修正版(revised in 10/01)(この後に探索できるか要確認)
 			LED4 = 1;	//斜め無しpassの作成
 			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
-//			 WALL_INFORMATION_save();
 			make_pass(goal_x, goal_y);
-			convert_pass();	//斜め無し用のパスに変換
-			LED4 = 0;
-
+			convert_pass_skew();	//斜めパスに変換
 			unknown_WALL_remove();	//探索が続く場合はremoveする
-//			 WALL_INFORMATION_save();	//正しい元情報に戻った
+			LED4 = 0;
 
 			sensor_enable = 1;
 			wait(500);
@@ -5352,7 +5902,7 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_EX(2000.0, 7000.0, 1);	//壁切れ改良型のパス
+			exe_pass_EX(1500.0, 7000.0, 1);	//壁切れ改良型のパス
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5362,13 +5912,10 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 		case 2:
 			LED4 = 1;	//斜め無しpassの作成
 			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
-//			 WALL_INFORMATION_save();
 			make_pass(goal_x, goal_y);
-			convert_pass();	//斜め無し用のパスに変換
-			LED4 = 0;
-
+			convert_pass_skew();	//斜め無し用のパスに変換
 			unknown_WALL_remove();	//探索が続く場合はremoveする
-//			 WALL_INFORMATION_save();	//正しい元情報に戻った
+			LED4 = 0;
 
 			sensor_enable = 1;
 			wait(500);
@@ -5379,11 +5926,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_EX(2000.0, 6000.0, 2);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(1800.0, 6000.0, 2);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5408,11 +5957,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_EX(1500.0, 6000.0, 2);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(2500.0, 8000.0, 2);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5423,7 +5974,7 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			LED4 = 1;	//斜め無しpassの作成
 			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
 			make_pass(goal_x, goal_y);
-			convert_pass();	//斜め無し用のパスに変換
+			convert_pass_skew();	//斜め無し用のパスに変換
 			LED4 = 0;
 
 			unknown_WALL_remove();	//探索が続く場合はremoveする
@@ -5437,6 +5988,100 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
+			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
+			if (reference_omega == 0.0) {
+				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
+			}
+			exe_pass_EX(2900.0, 10000.0, 2);	//とりあえず、大回りの移植ができているかの確認
+			ideal_balance_velocity = 0.0;
+			wait(1000);
+			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
+			sensor_enable = 0;
+
+			break;
+		case 5:
+			LED4 = 1;	//斜め無しpassの作成
+			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
+			make_pass(goal_x, goal_y);
+			convert_pass_skew();	//斜め無し用のパスに変換
+			LED4 = 0;
+
+			unknown_WALL_remove();	//探索が続く場合はremoveする
+
+			sensor_enable = 1;
+			wait(500);
+			while (sen.right_side < 2500)
+				;
+			wait(1000);
+			refer_flag = 1;	//リファレンス取得用フラグ
+			gyro_enable = 1;
+			while (reference_fin == 0)
+				;
+			reference_fin = 0;
+
+			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
+			if (reference_omega == 0.0) {
+				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
+			}
+			temp_exe_pass_EX(2200.0, 7000.0, 2);	//斜めで加速する
+			ideal_balance_velocity = 0.0;
+			wait(1000);
+			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
+			sensor_enable = 0;
+
+			break;
+		case 6:
+			LED4 = 1;	//斜め無しpassの作成
+			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
+			make_pass(goal_x, goal_y);
+			convert_pass_skew();	//斜め無し用のパスに変換
+			LED4 = 0;
+
+			unknown_WALL_remove();	//探索が続く場合はremoveする
+
+			sensor_enable = 1;
+			wait(500);
+			while (sen.right_side < 2500)
+				;
+			wait(1000);
+			refer_flag = 1;	//リファレンス取得用フラグ
+			gyro_enable = 1;
+			while (reference_fin == 0)
+				;
+			reference_fin = 0;
+
+			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
+			if (reference_omega == 0.0) {
+				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
+			}
+			temp_exe_pass_EX(2700.0, 9000.0, 2);	//斜めで加速する
+			ideal_balance_velocity = 0.0;
+			wait(1000);
+			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
+			sensor_enable = 0;
+
+			break;
+		case 7:
+			LED4 = 1;	//斜め無しpassの作成
+			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
+			make_pass(goal_x, goal_y);
+			convert_pass_skew();	//斜め無し用のパスに変換
+			unknown_WALL_remove();	//探索が続く場合はremoveする
+			LED4 = 0;
+
+			sensor_enable = 1;
+			wait(500);
+			while (sen.right_side < 2500)
+				;
+			wait(1000);
+			refer_flag = 1;	//リファレンス取得用フラグ
+			gyro_enable = 1;
+			while (reference_fin == 0)
+				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
@@ -5448,74 +6093,39 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			sensor_enable = 0;
 
 			break;
-		case 5:
-			LED4 = 1;	//斜めpassの作成
-			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
-//			WALL_INFORMATION_save();
-			make_pass(goal_x, goal_y);
-			convert_pass_skew();	//斜めパスに変換
-			LED4 = 0;
-
-			unknown_WALL_remove();	//探索が続く場合はremoveする
-//			WALL_INFORMATION_save();	//正しい元情報に戻った
-
-			sensor_enable = 1;
-			wait(500);
-			while (sen.right_side < 3000)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-			while (reference_fin == 0)
-				;
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-			}
-
-			exe_pass_test(1000.0, 6000.0, 1);
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
-
-			break;
-		case 6:
-			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
-			WALL_INFORMATION_save();
-			make_pass(goal_x, goal_y);
-			convert_pass();	//斜め無し用のパスに変換
-			LED4 = 0;
-
-			unknown_WALL_remove();	//探索が続く場合はremoveする
-			WALL_INFORMATION_save();	//正しい元情報に戻った
-
-			Kp_wall_l = 0.0001;
-			Kp_wall_r = 0.0001;	//ジャイロアリならこれでも発散しない
-			sensor_enable = 1;
-			wait(500);
-			while (sen.right_side < 3000)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-			while (reference_fin == 0)
-				;
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-			}
-
-			exe_pass_test(1200.0, 4000.0, 1);
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
-			break;
-		case 7:
-
-			break;
 		case 8:
+				unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
+				WALL_INFORMATION_save();
+				make_pass(goal_x, goal_y);
+				convert_pass();	//斜め無し用のパスに変換
+				LED4 = 0;
+
+				unknown_WALL_remove();	//探索が続く場合はremoveする
+				WALL_INFORMATION_save();	//正しい元情報に戻った
+
+				Kp_wall_l = 0.0001;
+				Kp_wall_r = 0.0001;	//ジャイロアリならこれでも発散しない
+				sensor_enable = 1;
+				wait(500);
+				while (sen.right_side < 3000)
+					;
+				wait(1000);
+				refer_flag = 1;	//リファレンス取得用フラグ
+				gyro_enable = 1;
+				while (reference_fin == 0)
+					;
+				reference_fin = 0;
+
+				GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
+				if (reference_omega == 0.0) {
+					GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
+				}
+
+				exe_kamawari_pass_test(2800.0, 10000.0, 3);	//とりあえず、大回りの移植ができているかの確認
+				ideal_balance_velocity = 0.0;
+				wait(1000);
+				GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
+				sensor_enable = 0;
 
 			break;
 		case 9:
@@ -5644,13 +6254,10 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 		case 1:
 			LED4 = 1;	//斜め無しpassの作成
 			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
-//			 WALL_INFORMATION_save();
 			make_pass(goal_x, goal_y);
 			convert_pass();	//斜め無し用のパスに変換
-			LED4 = 0;
-
 			unknown_WALL_remove();	//探索が続く場合はremoveする
-//			 WALL_INFORMATION_save();	//正しい元情報に戻った
+			LED4 = 0;
 
 			sensor_enable = 1;
 			wait(500);
@@ -5661,11 +6268,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_test(1200.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(1500.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5692,11 +6301,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_test(2000.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(2000.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5723,11 +6334,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_test(2300.0, 8000.0, 1);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(2200.0, 8000.0, 2);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5754,11 +6367,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_test(2800.0, 8000.0, 2);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(2800.0, 8000.0, 2);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5785,11 +6400,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_test(2300.0, 8000.0, 3);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(2300.0, 8000.0, 3);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5816,11 +6433,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_test(2800.0, 10000.0, 4);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(2800.0, 9000.0, 3);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5847,11 +6466,13 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			gyro_enable = 1;
 			while (reference_fin == 0)
 				;
+			reference_fin = 0;
+
 			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_test(3200.0, 10000.0, 4);	//とりあえず、大回りの移植ができているかの確認
+			exe_pass_EX(3000.0, 10000.0, 3);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -5859,35 +6480,6 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 8:
-			LED4 = 1;	//斜めpassの作成
-			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
-//			WALL_INFORMATION_save();
-			make_pass(goal_x, goal_y);
-			convert_pass_skew();	//斜めパスに変換
-			LED4 = 0;
-
-			unknown_WALL_remove();	//探索が続く場合はremoveする
-//			WALL_INFORMATION_save();	//正しい元情報に戻った
-
-			sensor_enable = 1;
-			wait(500);
-			while (sen.right_side < 3000)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-			while (reference_fin == 0)
-				;
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-			}
-
-			exe_pass_test(1500.0, 6000.0, 2);
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
 
 
 			break;
@@ -6107,9 +6699,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 		switch (second_number) {
 		case 1:
 			//座標変更モード!!
-					goal_x = number_select();
-					goal_y = number_select();
-					myprintf("goal_x=%d  goal_y=%d\r\n", goal_x, goal_y);
+			goal_x = number_select();
+			goal_y = number_select();
+			myprintf("goal_x=%d  goal_y=%d\r\n", goal_x, goal_y);
 
 			break;
 		case 2://パスの確認用
@@ -6163,6 +6755,26 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			}
 			break;
 		case 4:
+			temp_test_mazedata();
+
+			saved_maze_display();
+			pass_walkmap_display();
+//			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
+			saved_maze_display();
+//			skew_queue_walkmap_maker(7,7);
+			MAKE_PASS_SKEW(7,7);
+			for (i = 0; i <= last_p_i; i++) {
+				myprintf("pass[%d]=%d\r\n", i, pass[i]);
+			}
+			CONVERT_SKEWMAP_PASS();
+			for (i = 0; i <= last_p_i; i++) {
+				myprintf("motion[%d]=%d\r\n", i, motion[i]);
+			}
+
+			skew_walkmap_display();
+			pass_walkmap_display();
+			saved_maze_display();
+
 			break;
 		case 5:
 			break;
@@ -6318,47 +6930,7 @@ int main(void) {
 	 skew_queue_walkmap_maker(2, 1);
 	 skew_walkmap_display();
 	 */
-//	column_temp[0]=99;
-//	column_temp[1]=92;
-//	column_temp[2]=168;
-//	column_temp[3]=71;
-//	column_temp[4]=255;
-//	column_temp[5]=0;
-//	column_temp[6]=0;
-//	column_temp[7]=0;
-//	column_temp[8]=0;
-//	column_temp[9]=0;
-//	column_temp[10]=0;
-//	column_temp[11]=0;
-//	column_temp[12]=0;
-//	column_temp[13]=0;
-//	column_temp[14]=0;
-//	row_temp[0]=0;
-//	row_temp[1]=20480;
-//	row_temp[2]=40960;
-//	row_temp[3]=36864;
-//	row_temp[4]=26624;
-//	row_temp[5]=4096;
-//	row_temp[6]=8192;
-//	row_temp[7]=63488;
-//	row_temp[8]=0;
-//	row_temp[9]=0;
-//	row_temp[10]=0;
-//	row_temp[11]=0;
-//	row_temp[12]=0;
-//	row_temp[13]=0;
-//	row_temp[14]=0;
 
-//	WALL_INFORMATION_save();
-//
-//	maze_display();
-//	saved_maze_display();
-//	unknown_WALL_add();
-//	maze_display();
-//	unknown_WALL_remove();
-//	maze_display();
-//
-//	walkmap_display();
 
 	while (1) {
 		ideal_angacc = 0.0;	//fail_flagを抜けるために必要(と思われる)

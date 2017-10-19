@@ -142,7 +142,7 @@ void init_GPT() {
 	GPT0.GTIOR.BIT.GTIOB = 6;
 	GPT0.GTONCR.BIT.OAE = 1;	//出力許可
 	GPT0.GTONCR.BIT.OBE = 1;
-	GPT0.GTCCRA = dutty_l;			//Duty比設定
+	GPT0.GTCCRA = gptcount_l;			//Duty比設定
 	GPT0.GTCCRB = gptcount_r;
 	GPT0.GTINTAD.BIT.GTINTA = 1;	//割り込み許可・・・
 	GPT0.GTINTAD.BIT.GTINTB = 1;

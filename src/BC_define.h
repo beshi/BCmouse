@@ -45,9 +45,9 @@
 #define x_size 15
 #define y_size 15
 #define GOAL_X 7
-#define GOAL_Y 5
+#define GOAL_Y 7
 #define SAMPLE_NUMBER 800
-#define LOG_NUMBER 180
+#define LOG_NUMBER 150
 
 volatile typedef struct { /* 構造体の型枠を定義して，同時にそれを型名 velocty_t として定義する */
 	float right;
