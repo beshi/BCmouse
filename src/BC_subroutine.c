@@ -1129,3 +1129,37 @@ void temp_test_mazedata(){
 	row_fix[14]=1854;
 }
 
+void temp_test_mazedata_2(){
+	column_temp[0]=99;
+	column_temp[1]=92;
+	column_temp[2]=168;
+	column_temp[3]=71;
+	column_temp[4]=255;
+	column_temp[5]=0;
+	column_temp[6]=0;
+	column_temp[7]=0;
+	column_temp[8]=0;
+	column_temp[9]=0;
+	column_temp[10]=0;
+	column_temp[11]=0;
+	column_temp[12]=0;
+	column_temp[13]=0;
+	column_temp[14]=0;
+	row_temp[0]=0;
+	row_temp[1]=20480;
+	row_temp[2]=40960;
+	row_temp[3]=36864;
+	row_temp[4]=26624;
+	row_temp[5]=4096;
+	row_temp[6]=8192;
+	row_temp[7]=63488;
+	row_temp[8]=0;
+	row_temp[9]=0;
+	row_temp[10]=0;
+	row_temp[11]=0;
+	row_temp[12]=0;
+	row_temp[13]=0;
+	row_temp[14]=0;
+
+}
+
