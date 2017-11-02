@@ -7,225 +7,8 @@
 #include "iodefine.h"
 #include "BC_define.h"
 #include "BC_pass_old.h"
+#include "BC_subroutine.h"
 
-void Search_UnknownWall_Pass(char hikisuu_goal_x, char hikisuu_goal_y) {	//仮想足立により、道壁を記録する
-	volatile char ii,sx,sy;
-
-	sx = x;
-	sy = y;
-
-	direction_count = 0;		//スタート地点を考えている。
-	x = 0;
-	y = 1;
-	q_walk_map_maker(hikisuu_goal_x, hikisuu_goal_y);
-
-	while (1) {
-
-		switch (direction_count) {
-		case 0:
-			if (y < 15 && map[x][y + 1] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 0) == 0) {	//North & 直進
-				if(is_the_Wall_watched(x, y, 0) == 0){
-					Add_UnknownWall_Front(x, y, 0);
-				}
-				direction_xy();
-
-			} else if (x < 15 && map[x + 1][y] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 1) == 0) {	//North & 右折
-				if(is_the_Wall_watched(x-1, y, 1) == 0){
-					Add_UnknownWall_Front(x, y, 1);
-				}
-				if (direction_count == 3) {
-					direction_count = 0;
-				} else {
-					direction_count++;
-				}
-				direction_xy();
-
-			} else if (x > 0 && map[x - 1][y] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 3) == 0) {	//North & 左折
-				if(is_the_Wall_watched(x, y, 3) == 0){
-					Add_UnknownWall_Front(x, y, 3);
-				}
-
-				if (direction_count == 0) {
-					direction_count = 3;
-				} else {
-					direction_count--;
-				}
-				direction_xy();
-
-			} else {
-				if (direction_count == 0) {
-					direction_count = 2;
-				} else if (direction_count == 1) {
-					direction_count = 3;
-				} else if (direction_count == 2) {
-					direction_count = 0;
-				} else {
-					direction_count = 1;
-				}
-				direction_xy();
-			}
-			break;
-
-		case 1:
-			if (x < 15 && map[x + 1][y] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 1) == 0) {	//East & 直進
-				if(is_the_Wall_watched(x, y, 1) == 0){
-					Add_UnknownWall_Front(x, y, 1);
-				}
-
-				direction_xy();
-
-			} else if (y > 0 && map[x][y - 1] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 2) == 0) {	//East & 右折
-				if(is_the_Wall_watched(x, y, 2) == 0){
-					Add_UnknownWall_Front(x, y, 2);
-				}
-
-				if (direction_count == 3) {
-					direction_count = 0;
-				} else {
-					direction_count++;
-				}
-				direction_xy();
-
-			} else if (y < 15 && map[x][y + 1] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 0) == 0) {	//East & 左折
-				if(is_the_Wall_watched(x, y, 0) == 0){
-					Add_UnknownWall_Front(x, y, 0);
-				}
-
-				if (direction_count == 0) {
-					direction_count = 3;
-				} else {
-					direction_count--;
-				}
-				direction_xy();
-
-			} else {
-				if (direction_count == 0) {
-					direction_count = 2;
-				} else if (direction_count == 1) {
-					direction_count = 3;
-				} else if (direction_count == 2) {
-					direction_count = 0;
-				} else {
-					direction_count = 1;
-				}
-				direction_xy();
-			}
-			break;
-
-		case 2:
-			if (y > 0 && map[x][y - 1] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 2) == 0) {	//South & 直進
-				if(is_the_Wall_watched(x, y, 2) == 0){
-					Add_UnknownWall_Front(x, y, 2);
-				}
-
-				direction_xy();
-
-			} else if (x > 0 && map[x - 1][y] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 3) == 0) {	//South & 右折
-				if(is_the_Wall_watched(x, y, 3) == 0){
-					Add_UnknownWall_Front(x, y, 3);
-				}
-
-				if (direction_count == 3) {
-					direction_count = 0;
-				} else {
-					direction_count++;
-				}
-				direction_xy();
-
-			} else if (x < 15 && map[x + 1][y] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 1) == 0) {	//South & 左折
-				if(is_the_Wall_watched(x, y, 1) == 0){
-					Add_UnknownWall_Front(x, y, 1);
-				}
-
-				if (direction_count == 0) {
-					direction_count = 3;
-				} else {
-					direction_count--;
-				}
-				direction_xy();
-
-			} else {
-				if (direction_count == 0) {
-					direction_count = 2;
-				} else if (direction_count == 1) {
-					direction_count = 3;
-				} else if (direction_count == 2) {
-					direction_count = 0;
-				} else {
-					direction_count = 1;
-				}
-				direction_xy();
-			}
-			break;
-
-		case 3:
-			if (x > 0 && map[x - 1][y] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 3) == 0) {	//West & 直進
-				if(is_the_Wall_watched(x, y, 3) == 0){
-					Add_UnknownWall_Front(x, y, 3);
-				}
-
-				direction_xy();
-
-			} else if (y < 15 && map[x][y + 1] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 0) == 0) {	//West & 右折
-				if(is_the_Wall_watched(x, y, 0) == 0){
-					Add_UnknownWall_Front(x, y, 0);
-				}
-
-				if (direction_count == 3) {
-					direction_count = 0;
-				} else {
-					direction_count++;
-				}
-				direction_xy();
-
-			} else if (y > 0 && map[x][y - 1] == map[x][y] - 1
-					&& is_Exist_Wall(x, y, 2) == 0) {	//West & 左折
-				if(is_the_Wall_watched(x, y, 2) == 0){
-					Add_UnknownWall_Front(x, y, 2);
-				}
-
-				if (direction_count == 0) {
-					direction_count = 3;
-				} else {
-					direction_count--;
-				}
-				direction_xy();
-
-			} else {
-				if (direction_count == 0) {
-					direction_count = 2;
-				} else if (direction_count == 1) {
-					direction_count = 3;
-				} else if (direction_count == 2) {
-					direction_count = 0;
-				} else {
-					direction_count = 1;
-				}
-				direction_xy();
-			}
-			break;
-		}
-		if (x == hikisuu_goal_x && y == hikisuu_goal_y) {
-
-			break;
-		}
-
-	}
-	x = sx;	//元に戻す
-	y = sy;
-
-}
 
 void Add_UnknownWall_Front(int hikisuu_x, int hikisuu_y, int hikisuu_direction_count) {	//パスを生成するために必要20171002
 	switch (hikisuu_direction_count) {
@@ -256,6 +39,16 @@ void Add_UnknownWall_Front(int hikisuu_x, int hikisuu_y, int hikisuu_direction_c
 	}
 }
 
+void Reset_Unknown_Wall(){
+	volatile unsigned char jj;
+
+	for(jj=0;jj<15;jj++){
+		unknown_wall_row[jj]=0;
+		unknown_wall_column[jj]=0;
+	}
+
+}
+
 void Set_Temp_Goal(){
 	volatile unsigned char px,py,jj;
 
@@ -276,6 +69,16 @@ void Set_Temp_Goal(){
 		}
 	}
 
+}
+
+void Reset_Temp_Goal(){
+	volatile unsigned char px,py;
+
+	for(py=0;py<=15;py++){
+		for(px=0;px<=15;px++){
+			GoalPosition_remove(px,py);
+		}
+	}
 }
 
 char is_Exist_Unknown_Wall(char hikisuu_x, char hikisuu_y, char hikisuu_direction_count) {

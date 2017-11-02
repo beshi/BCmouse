@@ -24,7 +24,7 @@
 #define switch_1 PORTD.PORT.BIT.B6
 #define switch_2 PORTD.PORT.BIT.B7
 #define pi 3.141592
-#define d_tire 22.15 //22.20
+#define d_tire 22.25 //22.15(20171028に改訂)
 #define m_body 0.100	//kg単位
 #define Kp 0.001
 #define Kd 0.0001
@@ -33,12 +33,12 @@
 #define Kd_rot 0.0012 //0.0012
 #define Ki_rot 0.1 //0.1
 //#define Kp_wall 0.00005
-#define DIFF_THRESHOLD 15.0//30.0
-#define DIFF_WALL_THRE 100.0
-#define sen_right_refer 1480 //2000
-#define sen_left_refer 2150 //1520
-#define r_threshold 1000//1500	//1400
-#define l_threshold 900//1000	//900
+#define DIFF_THRESHOLD 8.0//15.0(10_29)
+#define DIFF_WALL_THRE 40.0//100.0(10_29)
+#define sen_right_refer 1450 //2000
+#define sen_left_refer 1850 //1520
+#define r_threshold 700//1000　　//xxx 高すぎるので、部室で低くすること(左はこのままでOKかも)
+#define l_threshold 800//900
 #define r_wall_judge 800
 #define l_wall_judge 800
 #define r_front_wall_judge 1000//110
@@ -46,8 +46,8 @@
 #define y_size 15
 #define GOAL_X 1
 #define GOAL_Y 0
-#define SAMPLE_NUMBER 1
-#define LOG_NUMBER 150//150
+#define SAMPLE_NUMBER 1	//800
+#define LOG_NUMBER 400//150
 
 volatile typedef struct { /* 構造体の型枠を定義して，同時にそれを型名 velocty_t として定義する */
 	float right;
