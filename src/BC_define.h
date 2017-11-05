@@ -32,13 +32,18 @@
 #define Kp_rot 0.001 //0.001
 #define Kd_rot 0.0012 //0.0012
 #define Ki_rot 0.1 //0.1
+#define Kp_Skew_Wall 0.075
 //#define Kp_wall 0.00005
 #define DIFF_THRESHOLD 8.0//15.0(10_29)
 #define DIFF_WALL_THRE 40.0//100.0(10_29)
-#define sen_right_refer 1450 //2000
-#define sen_left_refer 1850 //1520
+#define sen_right_refer 1370 //2000
+#define sen_left_refer 1950 //1520
 #define r_threshold 700//1000　　//xxx 高すぎるので、部室で低くすること(左はこのままでOKかも)
 #define l_threshold 800//900
+#define SKEW_R_Threshold 2000	//2500
+#define SKEW_L_Threshold 2600	//2800
+#define SKEW_R_Refer 2400//3000
+#define SKEW_L_Refer 3100	//3100
 #define r_wall_judge 800
 #define l_wall_judge 800
 #define r_front_wall_judge 1000//110
@@ -47,7 +52,7 @@
 #define GOAL_X 1
 #define GOAL_Y 0
 #define SAMPLE_NUMBER 1	//800
-#define LOG_NUMBER 400//150
+#define LOG_NUMBER 350//150
 
 volatile typedef struct { /* 構造体の型枠を定義して，同時にそれを型名 velocty_t として定義する */
 	float right;

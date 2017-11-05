@@ -513,7 +513,7 @@ void exe_kamawari_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_m
 	}
 	//以下、最初の動作のみ別枠で行う。
 	if (pass[read_p_i] == 255) {	//斜め無し・開幕ターン無し  学生大会で直した
-		daikei_for_pass_kai(90.0 + 47.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
+		daikei_for_pass_EX(90.0 + 47.0, vel_high, accel_normal, 0.0, vel_high, 1, 0);
 	}
 	//以下、最初以外の動作
 	while (1) {
@@ -524,7 +524,7 @@ void exe_kamawari_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_m
 
 		read_p_i++;
 		if (pass[read_p_i] <= 30 && pass[read_p_i] >= 1) {	//数値の区間の半分直進
-			daikei_for_pass_kai2(90.0 * pass[read_p_i], hikisuu_vmax,
+			daikei_for_pass_EX(90.0 * pass[read_p_i], hikisuu_vmax,
 					hikisuu_accel, vel_high, vel_high, 1, 1);
 		} else {
 
@@ -544,7 +544,7 @@ void exe_kamawari_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_m
 						turn[aa].P_1_8.d_f, turn[aa].P_1_8.d_r);	//小回り左スラローム
 				break;
 			case 100:   //停止(90区間で)(斜め無しpass用)
-				daikei_for_pass_kai2(90.0, vel_high, accel_normal, vel_high,
+				daikei_for_pass_EX(90.0, vel_high, accel_normal, vel_high,
 						0.0, 1, 0);
 //				myprintf("test100\r\n");
 				break;
@@ -563,8 +563,7 @@ void exe_kamawari_pass_test(float hikisuu_vmax, float hikisuu_accel, char para_m
 	sensor_enable = 0;			//センサ切り
 }
 
-void temp_exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {	//斜め直線での加速アリバージョン
-//	volatile int read_P_I;
+/*void temp_exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode) {	//斜め直線での加速アリバージョン
 	read_P_I = 0;
 
 	assign_parameters(hikisuu_mode);	//走行モードの決定
@@ -607,9 +606,9 @@ void temp_exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode
 			break;	//daikeiの関数を抜けられる
 		}
 		read_P_I++;
-//		if(read_P_I==1){		//debug
-//			sample_flag=1;		//debug
-//		}						//debug
+		if(read_P_I==2){		//debug
+			sample_flag=1;		//debug
+		}						//debug
 
 		if ((motion[read_P_I + 1] == 114) || (motion[read_P_I + 1] == 124)
 				|| (motion[read_P_I + 1] == 134)
@@ -641,13 +640,6 @@ void temp_exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode
 		else {
 
 			switch ((char) motion[read_P_I]) {
-			/*			case 255:	//最初の90直進(斜め無しpass用で、開幕直進の場合)
-			 daikei_for_pass_kai(90.0, vel_high, hikisuu_accel, 0.0,
-			 vel_high, 1, 0);	//後のパスに繋げるために区間距離は短くした
-			 break;
-			 case 253:	//最初の90直進(斜め無しpass用で、開幕何らかのターンの場合)
-
-			 break;*/
 			case 0:
 				break;
 			case 40:	//右小回り
@@ -915,7 +907,7 @@ void temp_exe_pass_EX(float hikisuu_vmax, float hikisuu_accel, char hikisuu_mode
 	wait(500);
 	GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
 	sensor_enable = 0;			//センサ切り
-}
+}*/
 
 
 
