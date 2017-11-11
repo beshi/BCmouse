@@ -32,7 +32,7 @@
 #define Kp_rot 0.001 //0.001
 #define Kd_rot 0.0012 //0.0012
 #define Ki_rot 0.1 //0.1
-#define Kp_Skew_Wall 0.075
+#define KP_SKEW_WALL 0.105	//0.075
 //#define Kp_wall 0.00005
 #define DIFF_THRESHOLD 8.0//15.0(10_29)
 #define DIFF_WALL_THRE 40.0//100.0(10_29)
@@ -44,6 +44,10 @@
 #define SKEW_L_Threshold 2600	//2800
 #define SKEW_R_Refer 2400//3000
 #define SKEW_L_Refer 3100	//3100
+#define SKEW_RFront_Threshold 800	//
+#define SKEW_LFront_Threshold 800	//
+#define SKEW_RFront_Refer 650	//
+#define SKEW_LFront_Refer 650	//
 #define r_wall_judge 800
 #define l_wall_judge 800
 #define r_front_wall_judge 1000//110
@@ -177,7 +181,7 @@ extern volatile float_highlow_t gyro_x, gyro_y, gyro_z, accel_x, accel_y,
 extern volatile float_pid_t K_center, K_rot, Erorr_center, Erorr_rot;
 extern volatile int_sensor_t sen;
 extern volatile unsigned_short_fix_t a;
-extern volatile const turn_velocities_t turn[7];
+extern volatile const turn_velocities_t turn[10];
 extern volatile kabekire_t flags_kabekire;
 
 /*
