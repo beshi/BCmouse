@@ -37,9 +37,9 @@
 #define DIFF_THRESHOLD 8.0//15.0(10_29)
 #define DIFF_WALL_THRE 40.0//100.0(10_29)
 #define sen_right_refer 1370 //2000
-#define sen_left_refer 1950 //1520
-#define r_threshold 700//1000　　//xxx 高すぎるので、部室で低くすること(左はこのままでOKかも)
-#define l_threshold 800//900
+#define sen_left_refer 1900 //1520
+#define r_threshold 900//700//1000　　//xxx 高すぎるので、部室で低くすること(左はこのままでOKかも)
+#define l_threshold 1000//800//900
 #define SKEW_R_Threshold 2000	//2500
 #define SKEW_L_Threshold 2600	//2800
 #define SKEW_R_Refer 2400//3000
@@ -49,8 +49,8 @@
 #define r_front_wall_judge 1000//110
 #define x_size 15
 #define y_size 15
-#define GOAL_X 1
-#define GOAL_Y 0
+#define GOAL_X 0
+#define GOAL_Y 6
 #define SAMPLE_NUMBER 1	//800
 #define LOG_NUMBER 350//150
 

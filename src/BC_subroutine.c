@@ -1289,3 +1289,75 @@ void temp_test_mazedata_4(){
 	row_temp[14]=0;
 
 }
+
+void LED_display(){
+	while (1) {		//LEDのデモンストレーション
+		//	PORT2.DR.BIT.B4 = 1;
+		wait(1000);
+		LED1 = 1;
+		wait(200);
+		LED2 = 1;	//LED2
+		wait(200);
+		LED3 = 1;
+		wait(200);
+		LED4 = 1;	//LED4
+		wait(200);
+		LED5 = 1;	//LED5
+		while (1) {
+			wait(200);
+			LED_V1 = 1;		//LED_V1
+			wait(200);
+			LED_V2 = 1;	//LED_V2
+			wait(200);
+			LED_V3 = 1;	//LED_V3
+			wait(200);
+			LED_V4 = 1;
+
+			wait(400);
+			LED_V1 = 0;
+			LED_V2 = 0;
+			LED_V3 = 0;
+			LED_V4 = 0;
+		}
+	}
+}
+
+void LED_motion1(){
+	volatile char ii;
+	for(ii=0;ii<2;ii++){
+		wait(100);
+		LED_V1 = 1;		//LED_V1
+		wait(100);
+		LED_V2 = 1;	//LED_V2
+		wait(100);
+		LED_V3 = 1;	//LED_V3
+		wait(100);
+		LED_V4 = 1;
+
+		wait(200);
+		LED_V1 = 0;
+		LED_V2 = 0;
+		LED_V3 = 0;
+		LED_V4 = 0;
+	}
+}
+void LED_motion2(){
+	volatile char ii;
+	for(ii=0;ii<1;ii++){
+		wait(80);
+		LED_V1 = 1;		//LED_V1
+		wait(80);
+		LED_V2 = 1;	//LED_V2
+		wait(80);
+		LED_V3 = 1;	//LED_V3
+		wait(80);
+		LED_V4 = 1;
+
+		wait(100);
+		LED_V1 = 0;
+		LED_V2 = 0;
+		LED_V3 = 0;
+		LED_V4 = 0;
+	}
+}
+

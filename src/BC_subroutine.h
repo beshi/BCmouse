@@ -40,5 +40,7 @@ void slalom_for_tuning(float hikisuu_angle, float angle1, float angle2, float om
 		float hikisuu_angacc, float unclock_wise,
 		float hikisuu_balance_velocity, float dist1, float dist2);
 void temp_test_mazedata();
-
+void LED_display();
+void LED_motion1();
+void LED_motion2();
 #endif /* BC_SUBROUTINE_H_ */
