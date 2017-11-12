@@ -1290,6 +1290,72 @@ void temp_test_mazedata_4(){
 
 }
 
+void mazedata_1112(){
+	column_fix[0]=16383;
+	column_fix[1]=28612;
+	column_fix[2]=44010;
+	column_fix[3]=28628;
+	column_fix[4]=34987;
+	column_fix[5]=17349;
+	column_fix[6]=63487;
+	column_fix[7]=0;
+	column_fix[8]=0;
+	column_fix[9]=0;
+	column_fix[10]=0;
+	column_fix[11]=0;
+	column_fix[12]=0;
+	column_fix[13]=0;
+	column_fix[14]=0;
+	row_fix[0]=4096;
+	row_fix[1]=26624;
+	row_fix[2]=5120;
+	row_fix[3]=11264;
+	row_fix[4]=31232;
+	row_fix[5]=1024;
+	row_fix[6]=0;
+	row_fix[7]=2048;
+	row_fix[8]=1024;
+	row_fix[9]=2048;
+	row_fix[10]=13312;
+	row_fix[11]=512;
+	row_fix[12]=1024;
+	row_fix[13]=31744;
+	row_fix[14]=16384;
+	column_watched_fix[0]=65535;
+	column_watched_fix[1]=65533;
+	column_watched_fix[2]=65535;
+	column_watched_fix[3]=65535;
+	column_watched_fix[4]=57343;
+	column_watched_fix[5]=63487;
+	column_watched_fix[6]=63487;
+	column_watched_fix[7]=0;
+	column_watched_fix[8]=0;
+	column_watched_fix[9]=0;
+	column_watched_fix[10]=0;
+	column_watched_fix[11]=0;
+	column_watched_fix[12]=0;
+	column_watched_fix[13]=0;
+	column_watched_fix[14]=0;
+	row_watched_fix[0]=48640;
+	row_watched_fix[1]=65024;
+	row_watched_fix[2]=65024;
+	row_watched_fix[3]=65024;
+	row_watched_fix[4]=65024;
+	row_watched_fix[5]=65024;
+	row_watched_fix[6]=65024;
+	row_watched_fix[7]=65024;
+	row_watched_fix[8]=65024;
+	row_watched_fix[9]=65024;
+	row_watched_fix[10]=62976;
+	row_watched_fix[11]=65024;
+	row_watched_fix[12]=65024;
+	row_watched_fix[13]=65024;
+	row_watched_fix[14]=65024;
+
+	Pass_Goal_x = 1;
+	Pass_Goal_y = 0;
+}
+
 void LED_display(){
 	while (1) {		//LEDのデモンストレーション
 		//	PORT2.DR.BIT.B4 = 1;
@@ -1358,6 +1424,21 @@ void LED_motion2(){
 		LED_V2 = 0;
 		LED_V3 = 0;
 		LED_V4 = 0;
+	}
+}
+
+void LED_motion3(){
+	volatile char ii;
+	for(ii=0;ii<1;ii++){
+		wait(80);
+		LED_V4 = 1;		//LED_V1
+		wait(80);
+		LED2 = 1;	//LED_V2
+
+		wait(100);
+		LED_V4 = 0;
+		LED2 = 0;
+
 	}
 }
 

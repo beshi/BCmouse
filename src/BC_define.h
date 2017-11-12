@@ -53,8 +53,8 @@
 #define r_front_wall_judge 1000//110
 #define x_size 15
 #define y_size 15
-#define GOAL_X 0
-#define GOAL_Y 6
+#define GOAL_X 1
+#define GOAL_Y 0
 #define SAMPLE_NUMBER 1	//800
 #define LOG_NUMBER 350//150
 
@@ -149,7 +149,7 @@ extern volatile unsigned char sample_flag, refer_flag, gyro_enable,
 		kabekire_enable_2, kushi_judge, pass[200] , motion[100] ,
 		last_p_i, reverse_flag, pass_kabekire_straight, wait_kabekire,
 		kabekire_read_flag, fail_flag, sen_fail_flag, fail_count, ei_flag_wall,
-		goal_x, goal_y, temp_goal_x, temp_goal_y, daikei_mode, aa, bb, cc;
+		goal_x, goal_y, temp_goal_x, temp_goal_y, daikei_mode, aa, bb, cc,Pass_Goal_x, Pass_Goal_y;
 extern volatile int sen_bat, sen_l_f_ON, sen_l_s_ON, sen_r_f_ON, sen_r_s_ON,
 		sen_l_f_OFF, sen_l_s_OFF, sen_r_f_OFF, sen_r_s_OFF, gptcount_l,
 		gptcount_r, sample_count, refer_count, buff_sen_right[10],

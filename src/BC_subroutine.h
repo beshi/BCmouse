@@ -43,4 +43,6 @@ void temp_test_mazedata();
 void LED_display();
 void LED_motion1();
 void LED_motion2();
+void LED_motion3();
+void mazedata_1112();
 #endif /* BC_SUBROUTINE_H_ */

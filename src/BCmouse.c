@@ -83,7 +83,7 @@ void task_exe(int first_number, int second_number, int therd_number);
 void unknown_WALL_add();
 void unknown_WALL_remove();
 void turn_angle_tuning(float h_totalangle, float h_angle1, float h_accel,
-		float h_front, float h_rear, float h_c_wise, float h_vel);
+		float h_front, float h_rear, float h_c_wise, float h_vel, char h_count);
 void test_wall_control();
 /*volatile typedef struct { // 構造体の型枠を定義して，同時にそれを型名 velocty_t として定義する
  float right;
@@ -242,25 +242,62 @@ volatile const turn_velocities_t turn[10] = {//[0]:重心速度500  [1]:重心�
 		}, {
 			  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
 				{  90.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0, 1000.0,    0,     0 }, //右小回り
-				{  89.5,  35.0,  54.5, 8750.0,  -1.0,  42.0,  73.0, 1000.0,    0,     0 }, //右大回り	//xxx ←ここ
+				{  89.5,  35.0,  54.5, 8750.0,  -1.0,  52.0,  73.0, 1000.0,    0,     0 }, //右大回り	//xxx ←ここ
 				{ 179.5,  41.5, 138.0, 5000.0,  -1.0,   3.0,  25.0, 1000.0,    0,     0 }, //右Uターン
-				{  44.4,  22.0,  22.2, 9850.0,  -1.0,  16.0,  64.0, 1000.0,    1,     0 }, //右45°ターン→斜め
-				{ 134.2,  45.0,  89.2, 9900.0,  -1.0,   0.0,   0.0, 1000.0,    1,     0 }, //右135°ターン→斜め
+				{  44.4,  22.0,  22.2, 9850.0,  -1.0,  13.0,  64.0, 1000.0,    1,     0 }, //右45°ターン→斜め
+				{ 134.2,  45.0,  89.2, 9900.0,  -1.0,  59.0,  74.0, 1000.0,    1,     0 }, //右135°ターン→斜め
 				{  44.4,  22.0,  22.2, 9850.0,  -1.0,  50.0,  32.0, 1000.0,    1,     0 }, //斜め→右45°ターン
 				{ 134.2,  45.0,  89.2, 9900.0,  -1.0,  47.0,  79.0, 1000.0,    1,     0 }, //斜め→右135°ターン
-				{  89.1,  40.0,  39.1,12150.0,  -1.0,   0.0,   0.0, 1000.0,    1,     0 }, //斜め→右V90°ターン
+				{  89.1,  40.0,  49.1,12150.0,  -1.0,  16.0,  37.0, 1000.0,    1,     0 }, //斜め→右V90°ターン
 				{  90.0,   0.0,   0.0,    0.0,   0.0,   0.0,   0.0, 1000.0,    1,     0 }, //左小回り
 				{  89.5,  35.0,  54.5, 8750.0,   1.0,  48.0,  78.0, 1000.0,    1,     0 }, //左大回り	//xxx ←ここ
 				{ 179.5,  40.5, 139.0, 5000.0,   1.0,   2.0,  27.0, 1000.0,    1,     0 }, //左Uターン
-				{  44.2,  22.0,  22.2, 9850.0,   1.0,   2.0,  83.0, 1000.0,    1,     0 }, //左45°ターン→斜め
-				{ 134.2,  45.0,  89.2, 9900.0,   1.0,   0.0,   0.0, 1000.0,    1,     0 }, //左135°ターン→斜め
+				{  44.2,  22.0,  22.2, 9850.0,   1.0,   7.0,  83.0, 1000.0,    1,     0 }, //左45°ターン→斜め
+				{ 134.2,  45.0,  89.2, 9900.0,   1.0,  62.0,  76.0, 1000.0,    1,     0 }, //左135°ターン→斜め
 				{  44.2,  22.0,  22.2, 9850.0,   1.0,  49.0,  33.0, 1000.0,    1,     0 }, //斜め→左45°ターン
 				{ 134.2,  45.0,  89.2, 9900.0,   1.0,  48.0,  92.0, 1000.0,    1,     0 }, //斜め→左135°ターン
-				{  89.1,  40.0,  39.1,12150.0,   1.0,   0.0,   0.0, 1000.0,    1,     0 } //斜め→左V90°ターン
+				{  89.1,  40.0,  49.1,12150.0,   1.0,  20.0,  40.0, 1000.0,    1,     0 } //斜め→左V90°ターン
 		}, {
 			  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1100.0,     0,     0 }, //右小回り
+				{  89.2,  40.0,  39.2, 9850.0,  -1.0,   0.0,   0.0, 1100.0,     0,     0 }, //右大回り	//xxx ←ここ
+				{ 180.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1100.0,     0,     0 }, //右Uターン
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1100.0,     1,     0 }, //右45°ターン→斜め
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1100.0,     1,     0 }, //右135°ターン→斜め
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1100.0,     1,     0 }, //斜め→右45°ターン
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1100.0,     1,     0 }, //斜め→右135°ターン
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1100.0,     1,     0 }, //斜め→右V90°ターン
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1100.0,     0,     0 }, //左小回り
+				{  89.2,  40.0,  39.2, 9850.0,   1.0,   0.0,   0.0, 1100.0,     0,     0 }, //左大回り	//xxx ←ここ
+				{ 180.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1100.0,     0,     0 }, //左Uターン
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1100.0,     1,     0 }, //左45°ターン→斜め
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1100.0,     1,     0 }, //左135°ターン→斜め
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1100.0,     1,     0 }, //斜め→左45°ターン
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1100.0,     1,     0 }, //斜め→左135°ターン
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1100.0,     1,     0 } //斜め→左V90°ターン
+		}, {			//turn_angle_tuning(179.4, 34.0, 8000.0, 5.0, 5.0, -1.0, 1200.0, 1);
+
+			  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel,  skew, enable}*/
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右小回り
-				{  89.2,  40.0,  39.2, 9850.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右大回り	//xxx ←ここ
+				{  89.2,  40.0,  49.2, 9850.0,  -1.0,  25.0,  73.0, 1200.0,     0,     0 }, //右大回り	//xxx ←ここ
+				{ 179.4,  34.0, 145.4, 8000.0,  -1.0,   2.0,  54.0, 1200.0,     0,     0 }, //右Uターン
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右45°ターン→斜め
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右135°ターン→斜め
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右45°ターン
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右135°ターン
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右V90°ターン
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左小回り
+				{  89.2,  40.0,  49.2, 9850.0,   1.0,  30.0,  72.0, 1200.0,     0,     0 }, //左大回り	//xxx ←ここ
+				{ 180.0,  32.0, 148.0, 8000.0,   1.0,   5.0,  45.0, 1200.0,     0,     0 }, //左Uターン
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左45°ターン→斜め
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左135°ターン→斜め
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→左45°ターン
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→左135°ターン
+				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 } //斜め→左V90°ターン
+		}, {
+				  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右小回り
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右大回り	//xxx ←ここ
 				{ 180.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右Uターン
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右45°ターン→斜め
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右135°ターン→斜め
@@ -268,7 +305,7 @@ volatile const turn_velocities_t turn[10] = {//[0]:重心速度500  [1]:重心�
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右135°ターン
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右V90°ターン
 				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左小回り
-				{  89.2,  40.0,  39.2, 9850.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左大回り	//xxx ←ここ
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左大回り	//xxx ←ここ
 				{ 180.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左Uターン
 				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左45°ターン→斜め
 				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左135°ターン→斜め
@@ -278,7 +315,7 @@ volatile const turn_velocities_t turn[10] = {//[0]:重心速度500  [1]:重心�
 		}, {
 				  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右小回り
-				{  89.2,  40.0,  39.2, 9850.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右大回り	//xxx ←ここ
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右大回り	//xxx ←ここ
 				{ 180.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右Uターン
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右45°ターン→斜め
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右135°ターン→斜め
@@ -286,43 +323,7 @@ volatile const turn_velocities_t turn[10] = {//[0]:重心速度500  [1]:重心�
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右135°ターン
 				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右V90°ターン
 				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左小回り
-				{  89.2,  40.0,  39.2, 9850.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左大回り	//xxx ←ここ
-				{ 180.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左Uターン
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左45°ターン→斜め
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左135°ターン→斜め
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→左45°ターン
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→左135°ターン
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 } //斜め→左V90°ターン
-		}, {
-				  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右小回り
-				{  89.2,  40.0,  39.2, 9850.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右大回り	//xxx ←ここ
-				{ 180.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右Uターン
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右45°ターン→斜め
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右135°ターン→斜め
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右45°ターン
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右135°ターン
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右V90°ターン
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左小回り
-				{  89.2,  40.0,  39.2, 9850.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左大回り	//xxx ←ここ
-				{ 180.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左Uターン
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左45°ターン→斜め
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左135°ターン→斜め
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→左45°ターン
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→左135°ターン
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 } //斜め→左V90°ターン
-		}, {
-				  /*{     θ,    θ1,    θ2, angacc,  wise, front,  rear,    vel, skew, enable}*/
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右小回り
-				{  89.2,  40.0,  39.2, 9850.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右大回り	//xxx ←ここ
-				{ 180.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //右Uターン
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右45°ターン→斜め
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //右135°ターン→斜め
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右45°ターン
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右135°ターン
-				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     1,     0 }, //斜め→右V90°ターン
-				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左小回り
-				{  89.2,  40.0,  39.2, 9850.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左大回り	//xxx ←ここ
+				{   0.0,   0.0,   0.0,    0.0,  -1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左大回り	//xxx ←ここ
 				{ 180.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     0,     0 }, //左Uターン
 				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左45°ターン→斜め
 				{   0.0,   0.0,   0.0,    0.0,   1.0,   0.0,   0.0, 1200.0,     1,     0 }, //左135°ターン→斜め
@@ -374,14 +375,21 @@ void assign_parameters(char para_mode) {
 		vel_high = 1200.0;
 		accel_normal = 6000.0;
 		aa = 4;	//速度900(小回り)
-		bb = 6;	//大廻り速度1200
+		bb = 7;	//大廻り速度1200
 		cc = 4;	//斜め速度900
 	} else if (para_mode == 6) {
+		vel_low = 1000.0;
+		vel_high = 1000.0;
+		accel_normal = 7000.0;
+		aa = 4;	//速度900(小回り)
+		bb = 5;	//大廻り速度1000
+		cc = 5;	//斜め速度1000
+	} else if (para_mode == 7) {
 		vel_low = 1000.0;
 		vel_high = 1200.0;
 		accel_normal = 7000.0;
 		aa = 4;	//速度900(小回り)
-		bb = 6;	//大廻り速度1200
+		bb = 7;	//大廻り速度1200
 		cc = 5;	//斜め速度1000
 	}
 
@@ -783,7 +791,7 @@ float kabekire_dist_right(float hikisuu_vel) {
 		} else if (hikisuu_vel <= 900.0) {
 			adjust_right = 9.0;	//。
 		} else if (hikisuu_vel <= 1000.0) {
-			adjust_right = 6.0;	//。
+			adjust_right = 12.0;	//。
 		} else if (hikisuu_vel > 1000.0) {
 			adjust_right = 5.0;	//これはテキトー。
 		}
@@ -796,9 +804,9 @@ float kabekire_dist_right(float hikisuu_vel) {
 		} else if (hikisuu_vel <= 800.0) {
 			adjust_right = 87.0;	//。
 		} else if (hikisuu_vel <= 1000.0) {
-			adjust_right = 95.0;	//。
+			adjust_right = 94.0;	//。
 		} else if (hikisuu_vel <= 1200.0) {
-			adjust_right = 90.0;	//これはテキトー。
+			adjust_right = 89.0;	//これはテキトー。
 		} else if (hikisuu_vel > 1200.0){
 
 		}
@@ -810,9 +818,9 @@ float kabekire_dist_right(float hikisuu_vel) {
 		} else if (hikisuu_vel <= 800.0) {
 			adjust_right = 3.0;	//。
 		} else if (hikisuu_vel <= 1000.0) {
-			adjust_right = -5.0;	//。
+			adjust_right = -4.0;	//。
 		} else if (hikisuu_vel <= 1200.0) {
-			adjust_right = 0.0;	//。
+			adjust_right = 1.0;	//。
 		} else if (hikisuu_vel > 1200.0) {
 			adjust_right = 0.0;	//これはテキトー。
 		}
@@ -1671,6 +1679,9 @@ void turn_for_pass(float hikisuu_angle, float angle1, float angle2,
 	Erorr_rot.i = 0.0;
 	ei_flag_center = 1;
 	q_dist_flag = 0;
+	if(dist1 < 0){
+		dist1 = 0.01;
+	}
 //	test_daikei(dist1, hikisuu_balance_velocity, 10.0, hikisuu_balance_velocity, hikisuu_balance_velocity, 0);
 	daikei_for_pass_EX(dist1, hikisuu_balance_velocity, 6000.0,
 			hikisuu_balance_velocity, hikisuu_balance_velocity, 1, 0);//壁切れ読まない
@@ -1723,6 +1734,7 @@ void turn_for_pass(float hikisuu_angle, float angle1, float angle2,
 void turn_for_skew_pass(float hikisuu_angle, float angle1, float angle2,
 		float omega_max, float hikisuu_angacc, float unclock_wise,
 		float hikisuu_v_init, float hikisuu_v_skew, float hikisuu_v_term, float dist1, float dist2, char h_skew_kabekire) {
+	volatile char local_wall_control = 0;
 	ideal_angle = 0.0;
 	ideal_omega = 0.0;
 	ideal_omega2 = 0.0;	//必要。
@@ -1731,6 +1743,8 @@ void turn_for_skew_pass(float hikisuu_angle, float angle1, float angle2,
 	q_dist_flag = 0;
 	if(h_skew_kabekire == 1){	//後が斜めの場合は斜め壁切れにする。
 		skew_kabekire.bit1=1;
+	}else{
+		local_wall_control = 1;
 	}
 	daikei_for_pass_EX(dist1, hikisuu_v_init, 6000.0,
 			hikisuu_v_init, hikisuu_v_skew, 0, 0);//壁切れ読まない	//普通はv_initのほうが大きい
@@ -1774,7 +1788,7 @@ void turn_for_skew_pass(float hikisuu_angle, float angle1, float angle2,
 
 	}
 	daikei_for_pass_EX(dist2, hikisuu_v_term, 6000.0,
-			hikisuu_v_skew, hikisuu_v_term, 0, 1);	//壁切れ読む	//v_termの方が大きいと想定
+			hikisuu_v_skew, hikisuu_v_term, local_wall_control, 1);	//壁切れ読む	//v_termの方が大きいと想定
 	flags_kabekire.wait=0;	//xxx 追加20171031
 	skew_kabekire.bit1=0;
 	ei_flag_center = 0;
@@ -3028,7 +3042,9 @@ void adachihou_q(int hikisuu_goal_x, int hikisuu_goal_y, int start_x,
 	y = start_y;
 	wait(300); 			//励磁直後は少し待つ！
 
-	balance_distance = 0.0;	//xxx 足立法のバグの原因?
+//	balance_distance = 0.0;	//xxx 足立法のバグの原因?
+
+	q_dist_flag = 0;
 	test_daikei(90.0, 500.0, 3000.0, 0.0, 500.0, 0);
 	direction_xy();
 	//	setReached(x, y);
@@ -3069,7 +3085,7 @@ void adachihou_q(int hikisuu_goal_x, int hikisuu_goal_y, int start_x,
 		}
 
 
-		/*		if (x == goal_x && y == goal_y) {		//以下、クシつぶし
+		if (x == goal_x && y == goal_y) {		//以下、クシつぶし
 
 		 } else if (x == goal_x + 1 && y == goal_y) {
 
@@ -3159,7 +3175,7 @@ void adachihou_q(int hikisuu_goal_x, int hikisuu_goal_y, int start_x,
 		 watched_wall_left(x, y - 1, 0);
 		 }
 		 }
-		 */
+
 //		total_dist = 0.0;	DCでは不要
 		LED1 = 1;
 //		q_walk_map_maker(hikisuu_goal_x, hikisuu_goal_y);
@@ -3448,7 +3464,7 @@ void adachihou2_q(char hikisuu_goal_x, char hikisuu_goal_y, char start_x,
 	y = start_y;
 	wait(300); 			//励磁直後は少し待つ！
 
-	balance_distance = 0.0;	//xxx 足立法のバグの原因?
+	q_dist_flag = 0;
 	test_daikei(90.0, V_search, ACCEL_search, 0.0, V_search, 0);
 	direction_xy();
 	watched_wall_front(0, 0, 0);		//初期に読めない壁だが、読んだことにする
@@ -3477,7 +3493,7 @@ void adachihou2_q(char hikisuu_goal_x, char hikisuu_goal_y, char start_x,
 		watched_wall_right(x, y, direction_count);
 		watched_wall_left(x, y, direction_count);
 
-		/*		if (x == goal_x && y == goal_y) {		//以下、クシつぶし
+		if (x == goal_x && y == goal_y) {		//以下、クシつぶし
 
 		 } else if (x == goal_x + 1 && y == goal_y) {
 
@@ -3567,7 +3583,7 @@ void adachihou2_q(char hikisuu_goal_x, char hikisuu_goal_y, char start_x,
 		 watched_wall_left(x, y - 1, 0);
 		 }
 		 }
-		 */
+
 //		total_dist = 0.0;	DCでは不要
 		LED1 = 1;
 		q_walk_map_maker(hikisuu_goal_x, hikisuu_goal_y);
@@ -5911,36 +5927,19 @@ void unknown_WALL_remove() {		//パス用に入れたsaved mazeの未探索壁�
 }
 
 void turn_angle_tuning(float h_totalangle, float h_angle1, float h_accel,
-		float h_front, float h_rear, float h_c_wise, float h_vel) {
+		float h_front, float h_rear, float h_c_wise, float h_vel, char h_count) {
 	volatile float h_angle2;
+	volatile char ii;
 
 	h_angle2 = h_totalangle - h_angle1;
 
 	test_daikei(180.0, h_vel, 6000, 0, h_vel, 0);
-	sample_flag=1;
-	slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
-			h_rear);		//保存パラメタ
-	test_daikei(63.6, h_vel, 6000, h_vel, h_vel, 0);
-	slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
-			h_rear);		//保存パラメタ
-	test_daikei(63.6, h_vel, 6000, h_vel, h_vel, 0);
-	slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
-			h_rear);		//保存パラメタ
-	test_daikei(63.6, h_vel, 6000, h_vel, h_vel, 0);
-	slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
-			h_rear);		//保存パラメタ
-	test_daikei(63.6, h_vel, 6000, h_vel, h_vel, 0);
-	slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
-			h_rear);		//保存パラメタ
-	test_daikei(63.6, h_vel, 6000, h_vel, h_vel, 0);
-	slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
-			h_rear);		//保存パラメタ
-	test_daikei(63.6, h_vel, 6000, h_vel, h_vel, 0);
-	slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
-			h_rear);		//保存パラメタ
-	test_daikei(63.6, h_vel, 6000, h_vel, h_vel, 0);
-	slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
-			h_rear);		//保存パラメタ
+	sample_flag=0;
+	for(ii=0;ii<h_count;ii++){
+		slalom_for_tuning(h_totalangle, h_angle1, h_angle2, 2000.0, h_accel, h_c_wise, h_vel, h_front,
+				h_rear);		//保存パラメタ
+		test_daikei(63.6, h_vel, 6000, h_vel, h_vel, 0);
+	}
 	test_daikei(90.0, h_vel, 6000.0, h_vel, 0, 0);
 	ideal_balance_velocity = 0.0;
 	LED_V1 = 0;
@@ -6195,17 +6194,17 @@ void initialize(){
 }
 
 void get_log(int log_number){
-	Log1[log_number] = (float)sen.right_side;
-	Log2[log_number] = (float)sen.left_side;
-	Log3[log_number] = (float)average_front_sen.right;
-	Log4[log_number] = (float)average_front_sen.left;
-	Log5[log_number] = (float)Error;
+//	Log1[log_number] = (float)sen.right_side;
+//	Log2[log_number] = (float)sen.left_side;
+//	Log3[log_number] = (float)average_front_sen.right;
+//	Log4[log_number] = (float)average_front_sen.left;
+//	Log5[log_number] = (float)Error;
 
-//	Log1[log_number] = (float)balance_distance;
-//	Log2[log_number] = (float)ideal_balance_velocity;
-//	Log3[log_number] = (float)balance_velocity;
-//	Log4[log_number] = (float)ideal_omega;
-//	Log5[log_number] = (float)omega;
+	Log1[log_number] = (float)balance_distance;
+	Log2[log_number] = (float)ideal_balance_distance;
+	Log3[log_number] = (float)ideal_balance_velocity;
+	Log4[log_number] = (float)x;
+	Log5[log_number] = (float)y;
 //	Log6[log_number] = (float)Error_wall.p;
 //	Log7[log_number] = (float)sen.left_side;
 //	Log8[log_number] = (float)average_sensor.left;
@@ -6232,7 +6231,7 @@ void interrupt_CMT0() {
 	}
 	if (sample_flag == 1 /*&& sample_count < SAMPLE_NUMBER*/) {
 		sample_count++;
-		if(sample_count==3){
+		if(sample_count==10){
 			get_log(log_count);
 			log_count++;
 			sample_count=0;
@@ -6529,7 +6528,7 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 	switch (first_number) {
 	case 1:	//パラメータ調整用の第1層
-		LED_motion2();
+		LED_motion3();
 		sensor_enable = 1;
 		wait(500);
 		while (sen.right_side < 2500)
@@ -6550,19 +6549,16 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 		//以下、ターン調整-第2層
 		switch (second_number) {
 		case 1://90deg, clock-wise,
-			cc=5;
-			bb=5;
-
-			vel =1000.0;
-			test_daikei(90.0, vel, 6000, 0, vel, 0);
-			turn_for_skew_pass(turn[cc].P_1_4.theta, turn[cc].P_1_4.th1,
-					turn[cc].P_1_4.th2, 1000.0, turn[cc].P_1_4.a_cc,
-					turn[cc].P_1_4.wise, turn[bb].P_1_4.vel,
-					turn[cc].P_1_4.vel, turn[cc].P_1_4.vel,
-					56.0,
-					62.0, 1);	//右135°ターン→斜め　1:後の壁切れ条件斜め
-			test_daikei(127.3, vel, 6000, vel, 0, 0);
-
+			vel=1200.0;
+			cc=7;
+			bb=7;
+			test_daikei(180.0, vel, 6000.0, 0, vel, 0);
+			turn_for_pass(turn[bb].P_1_10.theta, turn[bb].P_1_10.th1,
+					turn[bb].P_1_10.th2, 1000.0, turn[bb].P_1_10.a_cc,
+					turn[bb].P_1_10.wise, turn[bb].P_1_10.vel,
+					5.0,
+					45.0);	//左Uターン
+			test_daikei(180.0, vel, 6000.0, vel, 0, 0);
 			ideal_balance_velocity = 0.0;
 			LED_V1 = 0;
 			wait(1000);
@@ -6571,19 +6567,16 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 2:
-			cc=5;
-			bb=5;
-
-			vel =1000.0;
-			test_daikei(90.0, vel, 6000, 0, vel, 0);
-			turn_for_skew_pass(turn[cc].P_1_4.theta, turn[cc].P_1_4.th1,
-					turn[cc].P_1_4.th2, 1000.0, turn[cc].P_1_4.a_cc,
-					turn[cc].P_1_4.wise, turn[bb].P_1_4.vel,
-					turn[cc].P_1_4.vel, turn[cc].P_1_4.vel,
-					57.0,
-					62.0, 1);	//右135°ターン→斜め　1:後の壁切れ条件斜め
-			test_daikei(127.3, vel, 6000, vel, 0, 0);
-
+			vel=1200.0;
+			cc=7;
+			bb=7;
+			test_daikei(180.0, vel, 6000.0, 0, vel, 0);
+			turn_for_pass(turn[bb].P_1_10.theta, turn[bb].P_1_10.th1,
+					turn[bb].P_1_10.th2, 1000.0, turn[bb].P_1_10.a_cc,
+					turn[bb].P_1_10.wise, turn[bb].P_1_10.vel,
+					turn[bb].P_1_10.d_f + adjust_before_dist,
+					turn[bb].P_1_10.d_r);	//左Uターン
+			test_daikei(180.0, vel, 6000.0, vel, 0, 0);
 			ideal_balance_velocity = 0.0;
 			LED_V1 = 0;
 			wait(1000);
@@ -6592,84 +6585,23 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 3:
-			cc=5;
-			bb=5;
-
-			vel =1000.0;
-			test_daikei(90.0, vel, 6000, 0, vel, 0);
-			turn_for_skew_pass(turn[cc].P_1_12.theta, turn[cc].P_1_12.th1,
-					turn[cc].P_1_12.th2, 1000.0, turn[cc].P_1_12.a_cc,
-					turn[cc].P_1_12.wise, turn[bb].P_1_12.vel,
-					turn[cc].P_1_12.vel, turn[cc].P_1_12.vel,
-					48.0,
-					92.0, 1);	//左135°ターン→斜め　1:後の壁切れ条件斜め
-			test_daikei(127.3, vel, 6000, vel, 0, 0);
-
-			ideal_balance_velocity = 0.0;
-			LED_V1 = 0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
+			turn_angle_tuning(180.0, 32.0, 8000.0, 5.0, 5.0, 1.0, 1200.0, 1);
 
 			break;
 		case 4:
-			cc=5;
-			bb=5;
-
-			vel =1000.0;
-			test_daikei(90.0, vel, 6000, 0, vel, 0);
-			turn_for_skew_pass(turn[cc].P_1_12.theta, turn[cc].P_1_12.th1,
-					turn[cc].P_1_12.th2, 1000.0, turn[cc].P_1_12.a_cc,
-					turn[cc].P_1_12.wise, turn[bb].P_1_12.vel,
-					turn[cc].P_1_12.vel, turn[cc].P_1_12.vel,
-					48.0,
-					92.0, 1);	//左135°ターン→斜め　1:後の壁切れ条件斜め
-			test_daikei(127.3, vel, 6000, vel, 0, 0);
-
-			ideal_balance_velocity = 0.0;
-			LED_V1 = 0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
+			turn_angle_tuning(179.2, 32.5, 8000.0, 5.0, 5.0, 1.0, 1200.0, 1);
 
 			break;
 		case 5:
-			vel=900.0;
-			cc=4;
-			bb=4;
-			test_daikei(90.0, vel, 6000.0, 0, vel, 0);
-			turn_for_pass(turn[bb].P_1_1.theta, turn[bb].P_1_1.th1,
-					turn[bb].P_1_1.th2, 1000.0, turn[bb].P_1_1.a_cc,
-					turn[bb].P_1_1.wise, turn[bb].P_1_1.vel,
-					turn[bb].P_1_1.d_f + 4.0 + adjust_before_dist,
-					turn[bb].P_1_1.d_r);	//右大廻ターン
-			test_daikei(90.0, vel, 6000.0, vel, 0, 0);
-			ideal_balance_velocity = 0.0;
-			LED_V1 = 0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
+			turn_angle_tuning(179.8, 33.0, 8000.0, 5.0, 5.0, 1.0, 1200.0, 1);
 
 			break;
 		case 6:
-			vel=900.0;
-			cc=4;
-			bb=4;
-			test_daikei(90.0, vel, 6000.0, 0, vel, 0);
-			turn_for_pass(turn[bb].P_1_9.theta, turn[bb].P_1_9.th1,
-					turn[bb].P_1_9.th2, 1000.0, turn[bb].P_1_9.a_cc,
-					turn[bb].P_1_9.wise, turn[bb].P_1_9.vel,
-					turn[bb].P_1_9.d_f + adjust_before_dist,
-					turn[bb].P_1_9.d_r);	//右大廻ターン
-			test_daikei(90.0, vel, 6000.0, vel, 0, 0);
-			ideal_balance_velocity = 0.0;
-			LED_V1 = 0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
+			turn_angle_tuning(179.6, 33.5, 8000.0, 5.0, 5.0, 1.0, 1200.0, 1);
 
 			break;
 		case 7:
+			turn_angle_tuning(179.5, 32.0, 8000.0, 5.0, 5.0, 1.0, 1200.0, 4);
 
 			break;
 		case 8:
@@ -6688,33 +6620,6 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 		break;
 
 	case 2:	//ターン調整ⅱの第1層
-		wall_gain = number_select();
-		switch (wall_gain){
-		case 0:
-			K_skew_wall.p = KP_SKEW_WALL;	//0.15	//壁制御はP制御のみ
-			break;
-		case 1:
-			K_wall.p = 0.100;	//0.15	//壁制御はP制御のみ
-			break;
-		case 2:
-			K_wall.p = 0.105;	//0.15	//壁制御はP制御のみ
-			break;
-		case 3:
-			K_wall.p = 0.110;	//0.15	//壁制御はP制御のみ
-			break;
-		case 4:
-			K_wall.p = 0.115;	//0.15	//壁制御はP制御のみ
-			break;
-		case 5:
-			K_wall.p = 0.120;	//0.15	//壁制御はP制御のみ
-			break;
-		case 6:
-			K_wall.p = 0.125;	//vel=2000.0でも使用できる範囲
-			break;
-		case 7:
-			K_wall.p = 0.130;	//vel=2000.0でも使用できる範囲(2000で調整)
-			break;
-		}
 
 		LED_motion2();
 		sensor_enable = 1;
@@ -6893,7 +6798,7 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			}
 			EI_keisuu = 1.0;
 			LED5 = 1;
-			sample_flag = 0;
+			sample_flag = 1;
 			COPPY_SAVEDMAZE_TO_TEMP();	//クラッシュ後でも使用できるように.
 			direction_count = 0;
 			adachihou2_q(goal_x, goal_y, 0, 0, 1);
@@ -7163,7 +7068,7 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 		break;
 
-	case 4:		//斜め歩数マップ対応パス調整用―第1階層
+	case 4:		//斜め歩数マップ対応パス調整用―第1階層 //xxx  パスはここ
 		LED_motion2();
 		LED4 = 1;	//斜めmap対応パスの作成
 		unknown_WALL_add();	//帰り探索のためには後にremoveする
@@ -7420,6 +7325,27 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			break;
 
 		case 3:
+			sample_flag = 0;
+			direction_count = 0;
+			COPPY_SAVEDMAZE_TO_TEMP();	//クラッシュ後でも使用できるように.20171006
+			adachihou_q(goal_x, goal_y, 0, 0, 500.0, 5000.0);	//4マスゴール対応探索
+			wall_control = 0;
+			ideal_balance_velocity = 0.0;
+			wait(1000);
+			if(fail_flag==0){
+				WALL_INFORMATION_save();
+				WATCHED_WALL_INFORMATION_save();
+			}
+			new_serch_algorithm(0, 0, x, y, 2);
+			wall_control = 0;
+			ideal_balance_velocity = 0.0;
+			wait(1000);
+			if(fail_flag==0){
+				WALL_INFORMATION_save();
+				WATCHED_WALL_INFORMATION_save();
+			}
+			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
+			sensor_enable = 0;
 
 			break;
 		case 4:
@@ -7437,15 +7363,69 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 		}
 		break;
 
-	case 6:	//北信越パス予備用-第1層
+	case 6:	//北信越パス予備用-第1層	//xxx パス②はここ
+		wall_gain = number_select();
+		switch (wall_gain){
+		case 0:
+			vel=2000.0;	//0.15	//壁制御はP制御のみ
+			break;
+		case 1:
+			vel=2400.0;
+			break;
+		case 2:
+			vel=2600.0;
+			break;
+		case 3:
+			vel=3000.0;
+			break;
+		case 4:
+			vel=3400.0;
+			break;
+		case 5:
+			vel=3600.0;
+			break;
+		case 6:
+			vel=3800.0;
+			break;
+		case 7:
+			vel=4000.0;
+			break;
+		}
+		wall_gain = number_select();
+		switch (wall_gain){
+		case 0:
+			max_accel=7000.0;	//0.15	//壁制御はP制御のみ
+			break;
+		case 1:
+			max_accel=7500.0;
+			break;
+		case 2:
+			max_accel=8000.0;
+			break;
+		case 3:
+			max_accel=8500.0;
+			break;
+		case 4:
+			max_accel=9000.0;
+			break;
+		case 5:
+			max_accel=9500.0;
+			break;
+		case 6:
+			max_accel=10000.0;
+			break;
+		}
+
 		LED_motion2();
 		switch (second_number) {		//以下、北信越pass-第2層
 
 		case 1:
+
+			mazedata_1112();
 			LED4 = 1;	//斜め無しpassの作成
 			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
 			make_pass(Pass_Goal_x, Pass_Goal_y);
-			convert_pass();	//斜め無し用のパスに変換
+			convert_pass_skew();
 			unknown_WALL_remove();	//探索が続く場合はremoveする
 			LED4 = 0;
 
@@ -7464,7 +7444,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_EX(1500.0, 800.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
+
+			exe_pass_EX(vel, 2400.0, 7000.0, 1);	//
+//			exe_pass_EX(1500.0, 800.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -7472,15 +7454,15 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 2:
+			mazedata_1112();
 			LED4 = 1;	//斜め無しpassの作成
 			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
 //			 WALL_INFORMATION_save();
 			make_pass(Pass_Goal_x, Pass_Goal_y);
-			convert_pass();	//斜め無し用のパスに変換
-			LED4 = 0;
-
+			convert_pass_skew();
+//			convert_pass();	//斜め無し用のパスに変換
 			unknown_WALL_remove();	//探索が続く場合はremoveする
-//			 WALL_INFORMATION_save();	//正しい元情報に戻った
+			LED4 = 0;
 
 			sensor_enable = 1;
 			wait(500);
@@ -7497,7 +7479,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_EX(2000.0, 800.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
+
+			exe_pass_EX(vel, 2400.0, max_accel, 4);	//とりあえず、大回りの移植ができているかの確認
+//			exe_pass_EX(2000.0, 800.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -7505,16 +7489,16 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 3:
+			mazedata_1112();
 			LED4 = 1;	//斜め無しpassの作成
 			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
 //			 WALL_INFORMATION_save();
 			make_pass(Pass_Goal_x, Pass_Goal_y);
-			convert_pass();	//斜め無し用のパスに変換
+			convert_pass_skew();
 			LED4 = 0;
 
 			unknown_WALL_remove();	//探索が続く場合はremoveする
 //			 WALL_INFORMATION_save();	//正しい元情報に戻った
-
 			sensor_enable = 1;
 			wait(500);
 			while (sen.right_side < 2500)
@@ -7530,7 +7514,8 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_EX(2200.0, 800.0, 8000.0, 2);	//とりあえず、大回りの移植ができているかの確認
+
+			exe_pass_EX(vel, 2400.0, max_accel, 6);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -7538,16 +7523,15 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 4:
+			mazedata_1112();
 			LED4 = 1;	//斜め無しpassの作成
 			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
 //			 WALL_INFORMATION_save();
 			make_pass(Pass_Goal_x, Pass_Goal_y);
-			convert_pass();	//斜め無し用のパスに変換
-			LED4 = 0;
-
+			convert_pass_skew();
+//			convert_pass();	//斜め無し用のパスに変換
 			unknown_WALL_remove();	//探索が続く場合はremoveする
-//			 WALL_INFORMATION_save();	//正しい元情報に戻った
-
+			LED4 = 0;
 			sensor_enable = 1;
 			wait(500);
 			while (sen.right_side < 2500)
@@ -7563,7 +7547,10 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			if (reference_omega == 0.0) {
 				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
 			}
-			exe_pass_EX(2800.0, 800.0, 8000.0, 2);	//とりあえず、大回りの移植ができているかの確認
+
+
+			exe_pass_EX(vel, 2500.0, max_accel, 7);	//とりあえず、大回りの移植ができているかの確認
+//			exe_pass_EX(2000.0, 800.0, 7000.0, 1);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
@@ -7571,36 +7558,6 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 5:
-			LED4 = 1;	//斜め無しpassの作成
-			unknown_WALL_add();	//帰り探索のためには後でremoveする必要あり
-//			 WALL_INFORMATION_save();
-			make_pass(Pass_Goal_x, Pass_Goal_y);
-			convert_pass();	//斜め無し用のパスに変換
-			LED4 = 0;
-
-			unknown_WALL_remove();	//探索が続く場合はremoveする
-//			 WALL_INFORMATION_save();	//正しい元情報に戻った
-
-			sensor_enable = 1;
-			wait(500);
-			while (sen.right_side < 2500)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-			while (reference_fin == 0)
-				;
-			reference_fin = 0;
-
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-			}
-			exe_pass_EX(2300.0, 800.0, 8000.0, 3);	//とりあえず、大回りの移植ができているかの確認
-			ideal_balance_velocity = 0.0;
-			wait(1000);
-			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了
-			sensor_enable = 0;
 
 			break;
 		case 6:
@@ -7614,21 +7571,6 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			unknown_WALL_remove();	//探索が続く場合はremoveする
 //			 WALL_INFORMATION_save();	//正しい元情報に戻った
 
-			sensor_enable = 1;
-			wait(500);
-			while (sen.right_side < 2500)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-			while (reference_fin == 0)
-				;
-			reference_fin = 0;
-
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-			}
 			exe_pass_EX(2800.0, 800.0, 9000.0, 3);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
@@ -7647,21 +7589,6 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			unknown_WALL_remove();	//探索が続く場合はremoveする
 //			 WALL_INFORMATION_save();	//正しい元情報に戻った
 
-			sensor_enable = 1;
-			wait(500);
-			while (sen.right_side < 2500)
-				;
-			wait(1000);
-			refer_flag = 1;	//リファレンス取得用フラグ
-			gyro_enable = 1;
-			while (reference_fin == 0)
-				;
-			reference_fin = 0;
-
-			GPT.GTSTR.BIT.CST0 = 1;		//カウント開始！
-			if (reference_omega == 0.0) {
-				GPT.GTSTR.BIT.CST0 = 0;		//failセーフ
-			}
 			exe_pass_EX(3000.0, 800.0, 10000.0, 3);	//とりあえず、大回りの移植ができているかの確認
 			ideal_balance_velocity = 0.0;
 			wait(1000);
@@ -7764,6 +7691,7 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 8:
+
 			for (i = 0; i <= last_p_i; i++) {
 				myprintf("pass[%d]=%d\r\n", i, pass[i]);
 			}
@@ -7867,7 +7795,7 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 			break;
 		case 5:
 			vel = 1200.0;
-			test_daikei(90.0 * 1.0, vel, 6000.0, 0.0, vel, 1);
+			test_daikei(180.0 * 1.0, vel, 6000.0, 0.0, vel, 1);
 			test_daikei(90.0 * 4.0, vel, 5000.0, vel, vel, 1);
 			test_daikei(180.0 * 1.0, vel, 6000.0, vel, 0.0, 1);
 			wall_control = 0;
