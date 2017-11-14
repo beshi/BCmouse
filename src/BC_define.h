@@ -32,7 +32,7 @@
 #define Kp_rot 0.001 //0.001
 #define Kd_rot 0.0012 //0.0012
 #define Ki_rot 0.1 //0.1
-#define KP_SKEW_WALL 0.105	//0.075
+#define KP_SKEW_WALL 0.075	//0.105//0.075
 //#define Kp_wall 0.00005
 #define DIFF_THRESHOLD 8.0//15.0(10_29)
 #define DIFF_WALL_THRE 40.0//100.0(10_29)
@@ -42,19 +42,19 @@
 #define l_threshold 1000//800//900
 #define SKEW_R_Threshold 2000	//2500
 #define SKEW_L_Threshold 2600	//2800
-#define SKEW_R_Refer 2400//3000
+#define SKEW_R_Refer 2400	//3000
 #define SKEW_L_Refer 3100	//3100
-#define SKEW_RFront_Threshold 800	//
-#define SKEW_LFront_Threshold 800	//
-#define SKEW_RFront_Refer 650	//
-#define SKEW_LFront_Refer 650	//
+#define SKEW_RFront_Threshold 900	//800
+#define SKEW_LFront_Threshold 900	//800
+#define SKEW_RFront_Refer 700	//650
+#define SKEW_LFront_Refer 700	//650
 #define r_wall_judge 800
 #define l_wall_judge 800
 #define r_front_wall_judge 1000//110
 #define x_size 15
 #define y_size 15
-#define GOAL_X 1
-#define GOAL_Y 0
+#define GOAL_X 5
+#define GOAL_Y 9
 #define SAMPLE_NUMBER 1	//800
 #define LOG_NUMBER 350//150
 
