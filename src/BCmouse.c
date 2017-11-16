@@ -400,6 +400,13 @@ void assign_parameters(char para_mode) {
 		aa = 4;	//速度900(小回り)
 		bb = 7;	//大廻り速度1200
 		cc = 7;	//斜め速度1000
+	}else if (para_mode == 8) {
+		vel_low = 1200.0;
+		vel_high = 1400.0;
+		accel_normal = 7000.0;
+		aa = 4;	//速度900(小回り)
+		bb = 7;	//大廻り速度1200
+		cc = 7;	//斜め速度1000
 	}
 
 }
@@ -4740,7 +4747,7 @@ void CONVERT_SKEWMAP_PASS(){
 
 		}else if(pass[read_p_i] >= 1 && pass[read_p_i] <= 30
 				&& pass[read_p_i + 1] == 55
-				&& pass[read_p_i + 2] >= 201
+				&& pass[read_p_i + 2] == 201
 				&& pass[read_p_i + 3] == 50
 				&& pass[read_p_i + 4] == 201
 				&& pass[read_p_i + 5] == 55
@@ -7660,6 +7667,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 		switch (second_number) {
 		case 1:	//斜めパスパラメータ調整
+			vel=2000.0;
+			skew_vel=1600.0;
+			max_accel=6500.0;
 			exe_pass_EX(vel, skew_vel, max_accel, 1);	//斜め:650　大回り:800
 			ideal_balance_velocity = 0.0;
 			wait(1000);
@@ -7668,6 +7678,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 2:
+			vel=2600.0;
+			skew_vel=2000.0;
+			max_accel=6750.0;
 			exe_pass_EX(vel, skew_vel, max_accel, 3);	//斜め:650　大回り:900
 			ideal_balance_velocity = 0.0;
 			wait(1000);
@@ -7676,6 +7689,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 3:
+			vel=3400.0;
+			skew_vel=2800.0;
+			max_accel=7000.0;
 			exe_pass_EX(vel, skew_vel, max_accel, 4);	//斜め:900　大回り:1000
 			ideal_balance_velocity = 0.0;
 			wait(1000);
@@ -7684,6 +7700,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 4:
+			vel=4000.0;
+			skew_vel=3000.0;
+			max_accel=7500.0;
 			exe_pass_EX(vel, skew_vel, max_accel, 5);	//斜め:900　大回り:1200
 			ideal_balance_velocity = 0.0;
 			wait(1000);
@@ -7692,6 +7711,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 5:
+			vel=4000.0;	//ほぼ限界
+			skew_vel=3000.0;
+			max_accel=7500.0;
 			exe_pass_EX(vel, skew_vel, max_accel, 7);	//斜め:1000　大回り:1200
 			ideal_balance_velocity = 0.0;
 			wait(1000);
@@ -7700,7 +7722,9 @@ void task_exe(int first_number, int second_number, int therd_number) {//実行�
 
 			break;
 		case 6:
-			exe_pass_EX(vel, skew_vel, max_accel, 8);	//斜め:1000　大回り:1200
+			vel=4000.0;
+			skew_vel=3000.0;
+			max_accel=7500.0;
 			ideal_balance_velocity = 0.0;
 			wait(1000);
 			GPT.GTSTR.BIT.CST0 = 0;		//カウント終了

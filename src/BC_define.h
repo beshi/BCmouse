@@ -53,8 +53,8 @@
 #define r_front_wall_judge 1000//110
 #define x_size 15
 #define y_size 15
-#define GOAL_X 7
-#define GOAL_Y 7
+#define GOAL_X 14
+#define GOAL_Y 5
 #define SAMPLE_NUMBER 1	//800
 #define LOG_NUMBER 300//150
 
